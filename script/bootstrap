@@ -186,7 +186,10 @@ install_wsl_links () {
 install_dotfiles
 
 # install oh-my-zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/jdputsch/ohmyzsh/master/tools/install.sh)"
+if [ ! -d ${HOME}/.oh-my-zsh ]; then
+  REPO=jdputsch/ohmyzsh \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/jdputsch/ohmyzsh/master/tools/install.sh) --unattended"
+fi
 
 ### When we're on WSL (Windows Subsystem for Linux), we need
 ### to put some funky symlinks in place to "move" commonly used
