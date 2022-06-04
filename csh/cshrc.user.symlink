@@ -1,0 +1,34 @@
+################################################################
+#
+#         .cshrc.user file
+#
+#         User additions to the .cshrc file
+#
+################################################################
+
+#skip remaining setup if not an interactive shell
+if ($?USER == 0 || $?prompt == 0) exit
+
+if (($?loginsh) && ($?prompt)) then
+  setenv SHELL /bin/bash
+  exec /bin/bash --login
+endif
+
+# To add custom pathing create (or edit) the ~/.ownptah file and add 
+# your custom pathing in that file. Paths added will be loaded when the
+# own module is loaded.
+
+##  To be able to use "Control-D" to log out, uncomment the following line
+# unset ignoreeof
+
+##  To change the number of lines in history, uncomment the following line
+#set history=40
+#set savehist=40
+
+##  To set your editor, uncomment the following line and change to your
+##  editor of choice
+# setenv EDITOR vi
+
+##  To set your printer, uncomment the following line and change the example
+##  to your specific printer
+#setenv PRINTER bd4clr21

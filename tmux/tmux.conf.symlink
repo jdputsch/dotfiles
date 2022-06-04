@@ -1,0 +1,31 @@
+# set -g set-titles off
+set -g status on
+set -g status-keys emacs
+
+set -g prefix C-]
+unbind C-b
+bind C-] send-prefix
+
+set -g status-right '#7H | %F %s'
+
+setw -g monitor-activity on
+set -g visual-activity on
+
+# Turn on mouse modes
+set -g mouse on
+
+# split panes using | and -
+unbind %
+bind | split-window -h
+unbind '"'
+bind - split-window -v
+
+# use hjkl to navigate panes
+bind -r h select-pane -L
+bind -r j select-pane -D
+bind -r k select-pane -U
+bind -r l select-pane -R
+
+# reload config file (change file location to your the tmux.conf
+# you want to use)
+bind r source-file ~/.tmux.conf

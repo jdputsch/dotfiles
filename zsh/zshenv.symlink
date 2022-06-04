@@ -1,0 +1,171 @@
+#
+# Defines environment variables.
+#
+# Authors:
+#   Jeff Putsch <jdputsch@gmail.com>
+#
+# Set key environment variables:
+#    DOTZSH_VERSION, cdpath, infopath, manpath, path
+#    DOTZSH, DOTZSH_CUSTOM
+#
+# Note: See README file for startup order on RHEL, OpenSuse Leap 15
+#
+# To accomodate the reset of the environmnet via the /etc/* files on
+# login shells, we have two choices:
+#   1. setup the environment in .zshenv, and use .zshrc for all configuration.
+#   2. unset GLOBAL_RCS to prevent the loading of system init files entirely.
+# 2018-08-18 I'm using opt. 1. If that proves too slow, I'll switch to opt. 2.
+# 2018-10-22 opt 2 it is: this helps keep system profiles (e.g. bash) from messing
+#                         us about.
+
+# Don't read global configs
+unsetopt GLOBAL_RCS
+
+# Set the location of my zsh init files directory:
+export DOTZSH=${${(%):-%N}:A:h} # and I though perl was baud-barf...
+                                # ${(%):-%N} -> path to this script
+                                # :A:h -> resolves symlinks, then gets parent
+                                # See zshexpn(1), section HISTORY EXPANSION
+export DOTZSH_CUSTOM=${DOTZSH}/custom
+
+export DOTZSH_VERSION=$(/usr/bin/head -1 "$DOTZSH/_version")
+
+export DOTFILES=${DOTZSH:h}
+
+
+# Save current PATH environment variable, incase we need it later
+DOTZSH_ORIG_PATH=${PATH}
+
+# Basic X11 environment settings
+# TODO move to x11/paths.zsh (or env.zsh)
+export XENVIRONMENT=${HOME}/.Xdefaults
+
+# Source ${$HOME}/.zshrc, even in non-interactive shells
+# if [[ ! -o interactive ]];  then
+#     [[ -f ${HOME}/.zshrc ]] && source ${HOME}/.zshrc
+# fi
+
+# Set platform specific variables
+PLAT=""
+if [ -z "${DistroBasedOn}" ] && [ -f ${DOTZSH}/identify_platform ]; then
+    . ${DOTZSH}/identify_platform
+    PLAT=${DistroBasedOn}-${MAJOR_REV}-${MACH}
+fi
+
+# Places we may need to set the SHELL environment variable
+if [[ ${OS} = linux ]]; then
+    if [[ "$(</proc/version)" = *Microsoft* ]]; then
+        export SHELL=/usr/bin/zsh
+    elif [[ -z "${SHELL}" ]]; then
+        export SHELL=$(readlink /proc/$$/exe)
+    fi
+fi
+
+# If modules is available, use it, else manage key paths here
+if [ -f /usr/cadtools/bin/modules.dir/Shrc ]; then
+    if [[ -o login ]]; then
+      . /usr/cadtools/bin/modules.dir/Shrc
+    fi
+else
+    # Paths - make sure these have unique entries, then set default vaules
+    typeset -gU cdpath fpath mailpath manpath path
+    typeset -gUT INFOPATH infopath
+    
+    # Set the the list of directories that cd searches.
+    cdpath=(
+      $cdpath
+    )
+    
+    # Set the list of directories that `info` searches for manuals.
+    infopath=(
+      /usr/local/share/info
+      /usr/share/info
+      $infopath
+    )
+    
+    # OSX has a path helper (/usr/libexec/path_helper) to set PATH and MANPATH
+    # variables, normally I would use it, but I use APFs on Mac, therefore I don't
+    # use path helper anymore: on APFS, the order of files read from /etc/paths.d
+    # is not ascii/numeric anymore. therfore, we'll emulate it here.
+    
+    # # Set the list of directories that man searches for manuals.
+    if [[ $OSTYPE = darwin* ]] && [[ -f /etc/manpaths ]]; then
+        manpath=($(cat /etc/manpaths))
+    else
+        manpath=(
+          /usr/local/share/man
+          /usr/share/man
+          $manpath
+    )
+    fi
+    
+    for path_file in /etc/manpaths.d/*(.N); do
+      manpath+=($(<$path_file))
+    done
+    unset path_file
+    
+    # Set the list of directories that Zsh searches for programs.
+    if [[ $OSTYPE = darwin* ]] && [[ -f /etc/paths ]]; then
+    	path=($(cat /etc/paths) ~/bin)
+    else
+        path=(
+          /usr/local/{bin,sbin}
+          /usr/{bin,sbin}
+          /{bin,sbin}
+          ~/bin
+          $path
+        )
+    fi
+    
+    for path_file in /etc/paths.d/*(.N); do
+      path+=($(<$path_file))
+    done
+    unset path_file
+    
+    for path_file in ${HOME}/.paths.d/*(.N); do
+       for path_elem in $(cat ${path_file}); do
+           if [ -d ${path_elem} ]; then
+               path+=(${path_elem})
+           fi
+       done
+       unset path_elem
+    done
+    unset path_file
+    
+    # Move some path elements to the beginning of our search path
+    if [ -n "${PLAT}" ] && [ -d ${HOME}/${PLAT}/bin ]; then
+        path=( ${HOME}/${PLAT}/bin $path)
+    fi
+    
+    # Remove path elements that start with "/tmp/" -- a Maxim/Linux artifact:
+    path=("${(@)path:#/tmp/*}")
+
+    # MacOSX
+    if [[ "$OSTYPE" = darwin*  && -d /opt/pkg ]]; then
+      infopath=(
+        $infopath
+        /opt/pkg/info
+      )
+    fi
+    
+    # Linux
+    if [[ "$OSTYPE" = linux* ]]; then
+        [[ -d /usr/sepp/man ]] && manpath=($manpath /usr/sepp/man)
+        [[ -d /home/tekcad/local/man ]] && manpath=($manpath /home/tekcad/local/man)
+    fi
+fi
+
+# Language
+if [[ -z "$LANG" ]]; then
+  eval "$(locale)"
+fi
+
+# # Browser (Default)
+# if [[ "$OSTYPE" == darwin* ]]; then
+#   export BROWSER='open'
+# fi
+
+# local Variables:
+# mode: sh
+# eval: (sh-set-shell "zsh")
+# End:

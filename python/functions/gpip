@@ -1,0 +1,8 @@
+#
+# Run pip outside a virtual environment
+#
+# Authors:
+#   Jeff Putsch <jdputsch@gmail.com>
+#
+
+PIP_REQUIRE_VIRTUALENV="" pip "$@"

@@ -1,0 +1,9 @@
+#
+# List sepp sites
+#
+# Authors:
+#   Jeff Putsch <jeff.putsch@maximintegrated.com>
+#
+
+awk --posix '$2 ~ /[A-Z]{2,3}/ {print $2}' /usr/sepp/conf/sepp.wanservers \
+    | tr '[A-Z]' '[a-z]' | sort

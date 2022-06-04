@@ -1,0 +1,9 @@
+#compdef gpip
+#autoload
+
+#
+# Completes gpip
+#
+# Authors
+#   Jeff Putsch <jdputsch@gmail.com>
+#

@@ -1,0 +1,21 @@
+#
+# Enable pyenv
+#
+# Authors:
+#   Jeff Putsch <jdputsch@gmail.com>
+#
+
+for d in ${HOME}/.pyenv-${DistroBasedOn}-${MAJOR_REV} \
+         ${HOME}/.pyenv; do
+    if [[ -d ${d} ]]; then 
+        export PYENV_ROOT=${d}
+        break
+    fi
+done
+
+if [ -x ${PYENV_ROOT}/bin/pyenv ]; then
+    path=( ${PYENV_ROOT}/bin $path ) 
+    # eval "$(${PYENV_ROOT}/bin/pyenv init --path)"
+    path=( ${PYENV_ROOT}/shims $path ) 
+    eval "$(${PYENV_ROOT}/bin/pyenv init -)"
+fi

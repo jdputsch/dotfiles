@@ -1,0 +1,13 @@
+#
+# Executes commands at logout.
+#
+# Authors:
+#   Jeff Putsch <jdputsch@gmail.com>
+#
+
+# Customize to your needs...
+
+# Local Variables:
+# mode: sh
+# eval: (sh-set-shell "zsh")
+# End:

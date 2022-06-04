@@ -1,0 +1,40 @@
+#
+# dotzsh : https://github.com/dotphiles/dotzsh
+#
+# Executes commands at login post-zshrc.
+#
+# Authors:
+#   Jeff Putsch <jdputsch@gmail.com>
+#
+
+#
+# WSL does not implement nice(2), therefore we turn of BG_NICE
+#
+if [[ "${KERNEL}" == *Microsoft* ]]; then
+    unsetopt BG_NICE
+fi
+
+# Execute code that does not affect the current session in the background.
+{
+  # Compile the completion dump to increase startup speed.
+  dump_file="$HOME/.zcompdump"
+  if [[ "$dump_file" -nt "${dump_file}.zwc" || ! -s "${dump_file}.zwc" ]]; then
+    zcompile "$dump_file"
+  fi
+
+  # Set environment variables for launchd processes.
+  if [[ "$OSTYPE" == darwin* ]]; then
+    for env_var in PATH MANPATH; do
+      launchctl setenv "$env_var" "${(P)env_var}" 2>/dev/null
+    done
+  fi
+} &!
+
+
+# Local Variables:
+# mode: sh
+# eval: (sh-set-shell "zsh")
+# End:
+
+# export COLUMNS="120"
+# export PATH="$PATH:/home/jputsch/apps/acli/10.2.0/linux/7"

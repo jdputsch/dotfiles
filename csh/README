@@ -1,0 +1,22 @@
+Description of csh/tcsh startup files for RHEL and OpenSuse
+
+RHEL startup sequence (using "-f" when csh starts skips all init files)
+
+/etc/csh.cshrc       (all invocations)
+/etc/csh.login       (login shells)
+/etc/profile.d/*.csh (all invocations)
+~/.tcshrc            (all invocations)
+~/.cshrc             (all invocations)
+
+OpenSuse startup sequence
+
+/etc/csh.login                (login shells)
+/etc/profile.d/csh.ssh        (login shells)
+/etc/profile.d/*.csh          (login shells)
+/etc/csh.cshrc                (all invocations)
+/etc/profile.d/bindkey.tcsh   (all invocations)
+/etc/profile.d/ls.tcsh        (all invocations)
+/etc/profile.d/alias.tcsh     (all invocations)
+/etc/profile.d/complete.tcsh  (all invocations)
+~/.tcshrc                     (all invocations)
+~/.cshrc                      (all invocations)

@@ -1,0 +1,4 @@
+# If modules is available, use it, else manage key paths here
+# if [ -f /usr/cadtools/bin/modules.dir/Shrc ]; then
+#     . /usr/cadtools/bin/modules.dir/Shrc
+# fi

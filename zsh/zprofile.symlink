@@ -1,0 +1,17 @@
+#
+# Executes commands at login pre-zshrc.
+#
+# Authors:
+#   Jeff Putsch <jdputsch@gmail.com>
+#
+
+# Customize to your needs...
+
+# Local Variables:
+# mode: sh
+# eval: (sh-set-shell "zsh")
+# End:
+
+export COLUMNS="120"
+
+export PATH="$PATH:/home/jputsch/apps/acli/10.2.0/linux/7"

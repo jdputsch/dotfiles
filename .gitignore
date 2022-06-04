@@ -1,0 +1,9 @@
+.p4config
+.svn
+.git
+.DS_Store
+.p4root
+*.swp
+
+# ignore uuid files in fonts directories
+*.uuid

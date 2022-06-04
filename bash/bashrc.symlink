@@ -1,0 +1,100 @@
+# Get the location of this dotfile collection
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null && pwd )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink,
+                                                 # we need to resolve it relative to the
+                                                 # path where the symlink file was located
+done
+export DOTBASH="$( cd -P "$( dirname "$SOURCE" )" >/dev/null && pwd )"
+export DOTZSH="$( cd -P ${DOTBASH}/../zsh >/dev/null && pwd )"
+export DOTFILES=${DOTZSH#*/}
+
+# Set platform specific variables
+if [ -z "${DistroBasedOn}" ] && [ -f ${DOTZSH}/identify_platform ]; then
+    . ${DOTZSH}/identify_platform
+    PLAT=${DistroBasedOn}-${MAJOR_REV}-${MACH}
+else
+    PLAT=unknown
+fi
+
+# Fix umask to a sane value if needed
+if [[ $(umask) =~ ^[0]+$ ]]; then
+    umask 022
+fi
+
+# Store the original path in DOTZSH_BASH_ORIG_PATH if not already set
+if [[ -z "${DOTZSH_BASH_ORIG_PATH}" ]]; then
+    export DOTZSH_BASH_ORIG_PATH=${PATH}
+fi
+
+# Set BASH_ENV
+export BASH_ENV=${HOME}/.bashenv
+
+# If modules is available, use it, else manage key paths here
+if [ -f /usr/cadtools/bin/modules.dir/Shrc ]; then
+    . /usr/cadtools/bin/modules.dir/Shrc
+else
+    # add platform specific personal bin directory to beginning of path
+    if [ -d ${HOME}/${PLAT}/bin ] \
+        && [[ ":$PATH:" != *":${HOME}/${PLAT}/bin:"* ]];  then
+        PATH="${HOME}/${PLAT}/bin${PATH:+":$PATH"}"
+    fi
+fi
+
+# If on WSL, set window title to reflect Linux flavor..
+if [[ -n ${PS1} ]] && grep -qi Microsoft /proc/version; then
+    echo -en "\033]0;${WSL_DISTRO_NAME%%-*}\a"
+fi
+
+# Look for a suitable zsh
+ZSH=""
+if [ -x ${HOME}/${PLAT}/bin/zsh ]; then
+    ZSH=${HOME}/${PLAT}/bin/zsh
+elif [ -x /bin/zsh ]; then
+    ZSH=/bin/zsh
+fi
+
+#
+# For now we just switch to ZSH on login shells
+#
+if [[ -n ${PS1} ]] && [[ -n "${ZSH}" ]] && [[ -z "${VSCODE}" ]] \
+    && ( shopt -q login_shell \
+        || [[ $(ps -o comm= $PPID) = *terminal ]] \
+        || [[ $(ps -o comm= $PPID) = konsole ]] \
+        || [[ $(ps -o comm= $PPID) = code ]] \
+        || [[ -n "${VSCODE_IPC_HOOK_CLI}" ]] \
+    ); then
+    export SHELL=${ZSH}
+    exec ${SHELL} -l
+fi
+
+# If we get here, we're being called by VS Code. 
+# 1. Setup search path to match, or closely enough match ZSH...
+if [[ -n "${ZSH}" ]]; then
+    export PATH=$(${ZSH} -l -c "echo \${PATH}")
+fi
+
+for d in ${HOME}/.pyenv-${DistroBasedOn}-${MAJOR_REV} \
+         ${HOME}/.pyenv; do
+    if [[ -d ${d} ]]; then 
+        export PYENV_ROOT=${d}
+        break
+    fi
+done
+
+if [ -x ${PYENV_ROOT}/bin/pyenv ]; then
+    if [[ :$PATH: != *:${PYENV_ROOT}/bin:* ]]; then
+        export PATH=${PYENV_ROOT}/bin:${PATH}
+    fi
+    if [[ :$PATH: != *:${PYENV_ROOT}/shims:* ]]; then
+        eval "$(${PYENV_ROOT}/bin/pyenv init --path)"
+    fi
+    eval "$(${PYENV_ROOT}/bin/pyenv init -)"
+fi
+
+export COLUMNS="120"
+
+export PATH="$PATH:/home/jputsch/apps/acli/10.2.0/linux/7"

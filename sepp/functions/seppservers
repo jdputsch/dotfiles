@@ -1,0 +1,8 @@
+#
+# List sepp servers
+#
+# Authors:
+#   Jeff Putsch <jeff.putsch@maximintegrated.com>
+#
+
+sort -k 2 /usr/sepp/conf/sepp.wanservers | awk --posix '$1 !~ /^#/ && $2 ~ /[A-Z]{2,3}/ {print $1}'

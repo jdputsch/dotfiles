@@ -1,0 +1,15 @@
+#
+# Run svn, prefer /usr/sepp/bin/svn if it is available
+#
+# Authors:
+#   Jeff Putsch <jdputsch@gmail.com>
+#
+
+# Execute prefered svn versions if they are available
+if [[ -x /usr/sepp/bin/svn ]]; then
+    SVN_EXE=/usr/sepp/bin/svn
+else
+    SVN_EXE=$(whence -p svn)
+fi
+
+${SVN_EXE} "$@"

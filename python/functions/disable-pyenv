@@ -1,0 +1,13 @@
+#
+# Disable Pyenv.
+#
+# Authors:
+#   Jeff Putsch <jdputsch@gmail.com>
+#
+
+export PATH=`echo $PATH |
+    python -c "import sys, re; print(':'.join(x for x in sys.stdin.read().strip().split(':') if not 'pyenv' in x))"`
+
+for v in $(env | awk -F= '/PYENV_/ {print $1}'); do
+    unset $v
+done

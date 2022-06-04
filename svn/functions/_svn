@@ -1,0 +1,9 @@
+#compdef svn
+#autoload
+
+#
+# Completes svn
+#
+# Authors
+#   Jeff Putsch <jdputsch@gmail.com>
+#

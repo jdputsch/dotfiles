@@ -1,0 +1,9 @@
+# Source .bashrc
+
+echo "bash_profile loaded" >> /tmp/jputsch.bashrc
+
+[ -f ${HOME}/.bashrc ] && . ${HOME}/.bashrc
+
+export COLUMNS="120"
+
+export PATH="$PATH:/home/jputsch/apps/acli/10.2.0/linux/7"

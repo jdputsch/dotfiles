@@ -1,0 +1,9 @@
+#compdef enable-pyenv
+#autoload
+
+#
+# Completes seppservers
+#
+# Authors
+#   Jeff Putsch <jdputsch@gmail.com>
+#

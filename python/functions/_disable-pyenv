@@ -1,0 +1,9 @@
+#compdef disable-pyenv
+#autoload
+
+#
+# Completes disable-pyenv
+#
+# Authors
+#   Jeff Putsch <jdputsch@gmail.com>
+#

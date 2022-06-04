@@ -1,0 +1,50 @@
+! xterm config
+
+! general settings
+XTerm*VT100.geometry: 80x24
+XTerm*cursorColor: #a0a0a0
+
+! fonts and encoding
+XTerm*utf8: true
+XTerm*locale: true
+XTerm*renderFont: true
+XTerm*xftAntialias: true
+XTerm*faceName: xft:IBM Plex Mono:regular:size=10
+XTerm*fontdefault: xft:IBM Plex Mono:regular:size=10
+XTerm*fontdefault*Label: Default
+XTerm*font1: xft:IBM Plex Mono:regular:size=6
+XTerm*font1*Label: Unreadable
+XTerm*font2: xft:IBM Plex Mono:regular:size=8
+XTerm*font2*Label: 8-points
+XTerm*font3: xft:IBM Plex Mono:regular:size=10
+XTerm*font3*Label: 10-points
+XTerm*font4: xft:IBM Plex Mono:regular:size=12
+XTerm*font4*Label: 12-points
+XTerm*font5: xft:IBM Plex Mono:regular:size=14
+XTerm*font5*Label: 14-points
+XTerm*font6: xft:IBM Plex Mono:regular:size=16
+XTerm*font6*Label: 16-points
+
+! trim trailing spaces
+XTerm*trimSelection: true
+
+! key bindings
+! change font size dynamically
+! copy and paste with clipboard
+XTerm*VT100.translations: #override \
+    Ctrl <Key> 0: set-vt-font(d) \n\
+    Ctrl <Key> +: larger-vt-font() \n\
+    Ctrl <Key> -: smaller-vt-font() \n\
+    Ctrl Shift <Key> C: copy-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key> V: insert-selection(CLIPBOARD) \n\
+    Alt <Btn1Up>: insert-selection(PRIMARY)
+
+! emacs config
+emacs.FontBackend: xft
+
+! Xft font rendering ...
+Xft.antialias: 1
+Xft.hinting: 0
+Xft.hitstyle: hintnone
+Xft.lcdfilter: lcddefault
+Xft.rgba: rgb
