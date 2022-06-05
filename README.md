@@ -55,3 +55,5 @@ There are a few special files in the hierarchy:
                        versioned in your dotfiles but still keep those
                        autoloaded files in your home directory. These
                        get symlinked in when you run script/bootstrap.
+
+TODO: convert to a Make-based system, similar to: https://github.com/georgijd/dotfiles
