@@ -49,14 +49,7 @@ which sets up a few paths that'll be different on your particular machine.
 components
 =========-
 There are a few special files in the hierarchy:
-  * topic/*.zsh: Any files ending in .zsh get sourced:
-    - topic/env.zsh: Any file named env.zsh gets sourced, this would
-                     typically update $PATH and set env. vars for this
-                     topic
-    - topic/functions: A directory to contain zsh functions and
-                       completion definitions.
-    - topic/functions/_*: Files used by the completion autoload system.
-    - topic/functions/[^_]*:  All other files are function definitions.
+  * topic/
     - topic/*.symlink: Any file ending in *.symlink gets symlinked into
                        your $HOME. This is so you can keep all of those
                        versioned in your dotfiles but still keep those

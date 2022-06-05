@@ -185,11 +185,27 @@ install_wsl_links () {
 # setup_gitconfig
 install_dotfiles
 
+#
 # install oh-my-zsh
-if [ ! -d ${HOME}/.oh-my-zsh ]; then
+#
+export ZSH=${HOME}/.oh-my-zsh
+if [ ! -d ${ZSH} ]; then
   REPO=jdputsch/ohmyzsh \
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/jdputsch/ohmyzsh/master/tools/install.sh) --unattended"
+  CHSH=no \
+  RUNZSH=no \
+  KEEP_ZSHRC=yes \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/jdputsch/ohmyzsh/master/tools/install.sh)"
 fi
+# install custom/personal configs/parts of oh-my-zsh:
+# (
+#   cd $ZSH/custom
+#   git init .
+#   git fetch --tags --force https://github.com/jdputsch/ohmyzsh-custom.git "+refs/heads/*:refs/remotes/origin/*"
+#   git config remote.origin.url https://github.com/jdputsch/ohmyzsh-custom.git
+#   git config --add remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+#   git checkout main
+# )
+
 
 ### When we're on WSL (Windows Subsystem for Linux), we need
 ### to put some funky symlinks in place to "move" commonly used
