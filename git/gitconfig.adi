@@ -1,0 +1,22 @@
+[user]
+	name = Jeff Putsch
+	email = jeff.putsch@analog.com
+
+[alias]
+	p4 = !'/cad/adi/apps/git/linux/x86_64/7/git2.33.0/libexec/git-core/git-p4'
+
+[push]
+	followTags = true
+
+[diff]
+	tool = p4merge
+[difftool]
+	prompt = true 
+#[difftool "p4merge"]
+#    cmd = p4merge \"$LOCAL\" \"$REMOTE\"
+#    keepBackup = false
+
+[merge]
+	tool = p4merge
+[credential]
+	helper = cache --timeout=86400

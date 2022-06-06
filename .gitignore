@@ -4,6 +4,7 @@
 .DS_Store
 .p4root
 *.swp
+.nfs*
 
 # ignore uuid files in fonts directories
 *.uuid
