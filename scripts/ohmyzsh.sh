@@ -38,6 +38,9 @@ do_configure() {
 	ln -sf "$(pwd)/zsh/zprofile" "${HOME}/.zprofile"
 	ln -sf "$(pwd)/zsh/zshenv" "${HOME}/.zshenv"
 	ln -sf "$(pwd)/zsh/zshrc" "${HOME}/.zshrc"
+	info "[ohmyzsh][configure] Make custom dirs"
+	info "[ohmyzsh][configure] Install customizations"
+	mkdir -p ${ZSH_CUSTOM}/lib
 	for f in $(find $(pwd)/zsh/oh-my-zsh/custom -type f); do
 	    ln -sf "${f}" "${ZSH_CUSTOM}/${f#*oh-my-zsh/custom/}"
 	done

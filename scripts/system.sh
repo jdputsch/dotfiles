@@ -25,10 +25,53 @@ case ${OS} in
     *) FONTS_DIR="$HOME/.local/share/fonts" ;;
 esac
 
+do_install_darwin() {
+	local install_dir
+	info "[system] Install Darwin (MacOS) specific items..."
+	info "[system] Pkgsrc"
+	if [ ! -x /opt/pkg/bin/pkgin ]; then
+		install_dir=/tmp/pkgsrc
+		rm -rf ${install_dir} && mkdir -p ${install_dir}
+		(
+			cd ${install_dir}
+			BOOTSTRAP_TAR="bootstrap-macos11-trunk-x86_64-20211207.tar.gz"
+			BOOTSTRAP_SHA="07e323065708223bbac225d556b6aa5921711e0a"
+			curl -O https://pkgsrc.joyent.com/packages/Darwin/bootstrap/${BOOTSTRAP_TAR}
+			echo "${BOOTSTRAP_SHA}  ${BOOTSTRAP_TAR}" | shasum -c-
+			sudo tar -zxpf ${BOOTSTRAP_TAR} -C /
+			eval $(/usr/libexec/path_helper)
+		)
+		rm -rf ${install_dir}
+	fi
+	info "[system] git"
+	[ -x /opt/pkg/bin/git ] || sudo pkgin -y install git
+	info "[system] bash"
+	[ -x /opt/pkg/bin/bash ] || sudo pkgin -y install bash
+	info "[system] tmux"
+	[ -x /opt/pkg/bin/tmux ] || sudo pkgin -y install tmux
+
+	# Install pyenv
+	if [ ! -d ${HOME}/.pyenv ]; then
+	    (
+			info "[system] pyenv"
+			git clone --quiet https://github.com/pyenv/pyenv.git ~/.pyenv
+			export PYENV_ROOT=${HOME}/.pyenv
+			export PATH=${PYENV_ROOT}/bin:${PATH}
+			eval "$(pyenv init -)"
+			info "[system] pyenv-vitualenv"
+			git clone --quiet https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv
+			info "[system] pyenv-update"
+			git clone --quiet https://github.com/pyenv/pyenv-update.git $(pyenv root)/plugins/pyenv-update
+		)
+	fi
+}
 
 do_install() {
 	info "[system] Install"
-	info "[system]     ... currently nothing to do"
+	case ${OS} in
+	    darwin) do_install_darwin ;;
+		*) info "[system]     ... currently nothing to do" ;;
+		esac
 }
 
 do_configure() {
@@ -51,23 +94,22 @@ do_configure() {
     info "[system][configure] Install IBM Plex fonts"
     install_dir="/tmp/ibm-plex"
     rm -rf "${install_dir}" && mkdir -p "${install_dir}"
-	git clone --quiet --sparse "https://github.com/IBM/plex.git" "${install_dir}"
 	(
 	    cd "${install_dir}"
-		git sparse-checkout add IBM-Plex-Mono/fonts/complete/otf
-		git sparse-checkout add IBM-Plex-Sans/fonts/complete/otf
-		git sparse-checkout add IBM-Plex-Serif/fonts/complete/otf
-		find . -type f -name '*.otf' -exec cp -n "{}" "${FONTS_DIR}" \;
+		curl -L -f -O https://github.com/IBM/plex/releases/download/v6.0.2/OpenType.zip
+		unzip OpenType.zip
+		cd OpenType
+		find ./IBM-Plex-{Mono,Sans,Serif} -type f -name '*.otf' -exec cp -n "{}" "${FONTS_DIR}" \;
 	) >/dev/null
 	rm -rf "${install_dir}"
 
     info "[system][configure] Install Barlow fonts"
     install_dir="/tmp/barlow"
     rm -rf "${install_dir}" && mkdir -p "${install_dir}"
-	git clone --quiet --sparse "https://github.com/jpt/barlow.git" "${install_dir}"
 	(
 	    cd "${install_dir}"
-		git sparse-checkout add fonts/otf
+		curl -L -f -O https://github.com/jpt/barlow/archive/master.zip
+		unzip master.zip
 		find . -type f -name '*.otf' -exec cp -n "{}" "${FONTS_DIR}" \;
 	) >/dev/null
 	rm -rf "${install_dir}"
