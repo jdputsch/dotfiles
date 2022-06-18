@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/opt/pkg/bin/bash
 
 set -e
 
@@ -24,7 +24,6 @@ do_configure() {
 	# plugin entry format:
 	#   ["plugins/<name>"]="URL for git clone"
 	declare -A plugins=(
-		["plugins/autoenv"]="https://github.com/jdputsch/zsh-autoenv.git"
 	)
 	for path in "${!plugins[@]}"; do
 		if [[ ! -d "${ZSH_CUSTOM}/$path" ]]; then

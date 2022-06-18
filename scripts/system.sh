@@ -29,17 +29,22 @@ do_install_darwin() {
 	local install_dir
 	info "[system] Install Darwin (MacOS) specific items..."
 	info "[system] Pkgsrc"
-	if [ ! -x /opt/pkg/bin/pkgin ]; then
+	if [ ! -x /opt/pkg/bin/pkgin ] \
+           || [ ! -x  /opt/pkg/sbin/pkg_admin ];  then
 		install_dir=/tmp/pkgsrc
 		rm -rf ${install_dir} && mkdir -p ${install_dir}
 		(
-			cd ${install_dir}
-			BOOTSTRAP_TAR="bootstrap-macos11-trunk-x86_64-20211207.tar.gz"
-			BOOTSTRAP_SHA="07e323065708223bbac225d556b6aa5921711e0a"
-			curl -O https://pkgsrc.joyent.com/packages/Darwin/bootstrap/${BOOTSTRAP_TAR}
-			echo "${BOOTSTRAP_SHA}  ${BOOTSTRAP_TAR}" | shasum -c-
-			sudo tar -zxpf ${BOOTSTRAP_TAR} -C /
-			eval $(/usr/libexec/path_helper)
+		    cd ${install_dir}
+		    BOOTSTRAP_TAR="bootstrap-macos11-trunk-${MACH}-20211207.tar.gz"
+                        if [ ${MACH} = arm64 ]; then
+			    BOOTSTRAP_SHA="036b7345ebb217cb685e54c919c66350d55d819c"
+                        else
+			    BOOTSTRAP_SHA="07e323065708223bbac225d556b6aa5921711e0a"
+                        fi
+		    curl -O https://pkgsrc.joyent.com/packages/Darwin/bootstrap/${BOOTSTRAP_TAR}
+		    echo "${BOOTSTRAP_SHA}  ${BOOTSTRAP_TAR}" | shasum -c-
+		    sudo tar -zxpf ${BOOTSTRAP_TAR} -C /
+		    eval $(/usr/libexec/path_helper)
 		)
 		rm -rf ${install_dir}
 	fi
