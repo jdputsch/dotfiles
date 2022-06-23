@@ -11,13 +11,13 @@
 [diff]
 	tool = p4merge
 [difftool]
-	prompt = true 
-#[difftool "p4merge"]
-#    cmd = p4merge \"$LOCAL\" \"$REMOTE\"
-#    keepBackup = false
-
+	prompt = false
 [merge]
 	tool = p4merge
+[mergetool]
+	prompt = false
+ 	keepBackup = false
+
 [credential]
 	helper = 
 	helper = /home/jputsch/apps/github/gcm/linux/7/2.0.696/git-credential-manager-core
