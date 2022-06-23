@@ -19,4 +19,7 @@
 [merge]
 	tool = p4merge
 [credential]
-	helper = cache --timeout=86400
+	helper = 
+	helper = /home/jputsch/apps/github/gcm/linux/7/2.0.696/git-credential-manager-core
+[credential "https://dev.azure.com"]
+	useHttpPath = true
