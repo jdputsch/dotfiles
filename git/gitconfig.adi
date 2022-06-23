@@ -21,5 +21,6 @@
 [credential]
 	helper = 
 	helper = /home/jputsch/apps/github/gcm/linux/7/2.0.696/git-credential-manager-core
+	credentialStore = gpg
 [credential "https://dev.azure.com"]
 	useHttpPath = true
