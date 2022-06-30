@@ -3,6 +3,14 @@
 .DEFAULT_GOAL := all
 .PHONY: git emacs
 
+OSTYPE := $(shell uname -s | tr '[A-Z]' '[a-z]')
+
+ifeq ($(OSTYPE),darwin)
+BASH=/opt/pkg/bash
+else
+BASH=/usr/bin/bash
+endif
+
 all: system git x11 terminal emacs ## Install and configure everything (default)
 help: ## Display help
 	@grep -hE '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -26,10 +34,10 @@ csh: FORCE ## Configure csh
 zsh: FORCE ## Configure zsh
 	@./scripts/zsh.sh configure
 ohmyzsh: ohmyzsh-install ohmyzsh-configure ## Install and configure Oh My Zsh
-ohmyzsh-install: ## Install Oh My Zsh
-	@./scripts/ohmyzsh.sh install
-ohmyzsh-configure: ## Configure Oh My Zsh
-	@./scripts/ohmyzsh.sh configure
+ohmyzsh-install: system-install FORCE ## Install Oh My Zsh
+	@$(BASH) ./scripts/ohmyzsh.sh install
+ohmyzsh-configure: FORCE ## Configure Oh My Zsh
+	@$(BASH) ./scripts/ohmyzsh.sh configure
 
 emacs: FORCE ## Configure emacs
 	@./scripts/emacs.sh configure

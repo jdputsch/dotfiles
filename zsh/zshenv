@@ -47,8 +47,8 @@ export XENVIRONMENT=${HOME}/.Xdefaults
 
 # Set platform specific variables
 PLAT=""
-if [ -z "${DistroBasedOn}" ] && [ -f ${DOTZSH}/identify_platform ]; then
-    . ${DOTZSH}/identify_platform
+if [ -z "${DistroBasedOn}" ] && [ -f ${DOTFILES}/scripts/identify_platform.sh ]; then
+    . ${DOTFILES}/scripts/identify_platform.sh
     PLAT=${DistroBasedOn}-${MAJOR_REV}-${MACH}
 fi
 
