@@ -13,8 +13,8 @@ export DOTZSH="$( cd -P ${DOTBASH}/../zsh >/dev/null && pwd )"
 export DOTFILES=${DOTZSH#*/}
 
 # Set platform specific variables
-if [ -z "${DistroBasedOn}" ] && [ -f ${DOTZSH}/identify_platform ]; then
-    . ${DOTZSH}/identify_platform
+if [ -z "${DistroBasedOn}" ] && [ -f ${DOTFILES}/scripts/identify_platform.sh ]; then
+    . ${DOTFILES}/scripts/identify_platform.sh
     PLAT=${DistroBasedOn}-${MAJOR_REV}-${MACH}
 else
     PLAT=unknown
