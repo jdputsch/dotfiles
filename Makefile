@@ -6,7 +6,7 @@
 OSTYPE := $(shell uname -s | tr '[A-Z]' '[a-z]')
 
 ifeq ($(OSTYPE),darwin)
-BASH=/opt/pkg/bash
+BASH=/opt/pkg/bin/bash
 else
 BASH=/usr/bin/bash
 endif
