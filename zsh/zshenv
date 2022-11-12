@@ -122,7 +122,8 @@ else
     done
     unset path_file
     
-    for path_file in ${HOME}/.paths.d/*(.N); do
+    for path_file in ${HOME}/.paths.d/*; do
+      [ -e $HOME/ZSH_DEBUG ] && echo ".zshenv: settings paths from $path_file" >> $HOME/ZSH_DEBUG
        for path_elem in $(cat ${path_file}); do
            if [ -d ${path_elem} ]; then
                path+=(${path_elem})
