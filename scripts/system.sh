@@ -145,6 +145,18 @@ do_configure() {
     	fc-cache -f
 	fi
 
+    info "[system][configure] Install \$HOME/.paths.d dir"
+    if [ -e $HOME/.paths.d ] \
+        && ( [ -L $HOME/.paths.d ] || [ ! -d $HOME/.paths.d ] ); then
+        rm -f $HOME/.paths.d
+    fi
+    [ -d $HOME/.paths.d ] || mkdir -p $HOME/.paths.d
+    if is_maxim_host; then
+        for f in $(pwd)/system/paths-maxim.d/*; do
+            ln -sf $f ${HOME}/.paths.d/$(basename $f)
+        done
+    fi
+
 	if type -t module >/dev/null 2>&1; then
 	    module unload git
 	fi

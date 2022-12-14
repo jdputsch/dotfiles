@@ -47,8 +47,8 @@ export XENVIRONMENT=${HOME}/.Xdefaults
 
 # Set platform specific variables
 PLAT=""
-if [ -z "${DistroBasedOn}" ] && [ -f ${DOTZSH}/identify_platform ]; then
-    . ${DOTZSH}/identify_platform
+if [ -z "${DistroBasedOn}" ] && [ -f ${DOTFILES}/scripts/identify_platform.sh ]; then
+    . ${DOTFILES}/scripts/identify_platform.sh
     PLAT=${DistroBasedOn}-${MAJOR_REV}-${MACH}
 fi
 
@@ -122,7 +122,8 @@ else
     done
     unset path_file
     
-    for path_file in ${HOME}/.paths.d/*(.N); do
+    for path_file in ${HOME}/.paths.d/*; do
+      [ -e $HOME/ZSH_DEBUG ] && echo ".zshenv: settings paths from $path_file" >> $HOME/ZSH_DEBUG
        for path_elem in $(cat ${path_file}); do
            if [ -d ${path_elem} ]; then
                path+=(${path_elem})

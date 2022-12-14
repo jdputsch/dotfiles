@@ -79,7 +79,7 @@ ZSH_PYENV_QUIET=true
 # Add wisely, as too many plugins slow down shell startup.
 if [[ ${OS} = "darwin" ]]; then
   plugins=(pyenv)
-fi
+endif
 
 source $ZSH/oh-my-zsh.sh
 
