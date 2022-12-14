@@ -157,15 +157,22 @@ do_configure() {
         done
     fi
 
-	if type -t module >/dev/null 2>&1; then
-	    module unload git
-	fi
+    info "[system][configure] Install \$HOME/etc dir"
+    [ -d $HOME/etc ] || mkdir -p $HOME/etc
+    for f in $(pwd)/system/home_etc.d/*; do
+        ln -sf $f ${HOME}/etc/$(basename $f)
+    done
 
-	# Install modules links:
-	if type -t module >/dev/null 2>&1; then
-		ln -sf "$(pwd)/modules/adi_modules" "${HOME}/.adi_modules"
-		ln -sf "$(pwd)/modules/ownpath" "${HOME}/.ownpath"
-	fi
+    info "[system][configure] Setup ADI modules"
+    if type -t module >/dev/null 2>&1; then
+        module unload git
+    fi
+
+    # Install modules links:
+    if type -t module >/dev/null 2>&1; then
+    	ln -sf "$(pwd)/modules/adi_modules" "${HOME}/.adi_modules"
+    	ln -sf "$(pwd)/modules/ownpath" "${HOME}/.ownpath"
+    fi
 }
 
 main() {
