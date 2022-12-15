@@ -164,8 +164,8 @@ do_configure() {
     done
 
     info "[system][configure] Install \$HOME/lib dir"
-    [ -d $HOME/lib ] || mkdir -p $HOME/etc
-    for f in $(pwd)/system/home_lib.d/*; do
+    [ -d $HOME/lib ] || mkdir -p $HOME/lib
+    for f in $( ls $(pwd)/system/home_lib.d 2>/dev/null ); do
         ln -sf $f ${HOME}/lib/$(basename $f)
     done
 
