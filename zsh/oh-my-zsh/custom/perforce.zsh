@@ -8,6 +8,12 @@
 if [[ ${OS} = "darwin" ]]; then
     export P4CONFIG=.p4config
     export P4PORT=perforce.maxim-ic.com:2666
+
+    if [ -x /Applications/p4merge.app/Contents/MacOS/p4merge ]; then
+        p4merge() {
+            /Applications/p4merge.app/Contents/MacOS/p4merge "$@"
+        }
+    fi
 fi
 
 # export P4USER=jputsch
