@@ -7,3 +7,7 @@ echo "bash_profile loaded" >> /tmp/jputsch.bashrc
 export COLUMNS="120"
 
 export PATH="$PATH:/home/jputsch/apps/acli/10.2.0/linux/7"
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"

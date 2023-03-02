@@ -163,6 +163,12 @@ do_configure() {
         ln -sf $f ${HOME}/etc/$(basename $f)
     done
 
+    info "[system][configure] Install \$HOME/lib dir"
+    [ -d $HOME/lib ] || mkdir -p $HOME/lib
+    for f in $( ls $(pwd)/system/home_lib.d 2>/dev/null ); do
+        ln -sf $f ${HOME}/lib/$(basename $f)
+    done
+
     info "[system][configure] Setup ADI modules"
     if type -t module >/dev/null 2>&1; then
         module unload git
