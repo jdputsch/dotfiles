@@ -4,6 +4,8 @@
 
 [alias]
 	p4 = !'/cad/adi/apps/git/linux/x86_64/7/git2.33.0/libexec/git-core/git-p4'
+	prune-branches = !git remote prune origin && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -d
+
 
 [push]
 	followTags = true
@@ -24,3 +26,5 @@
 	credentialStore = gpg
 [credential "https://dev.azure.com"]
 	useHttpPath = true
+
+
