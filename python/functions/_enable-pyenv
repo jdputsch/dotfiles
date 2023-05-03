@@ -1,9 +1,0 @@
-#compdef enable-pyenv
-#autoload
-
-#
-# Completes enable-pyenv
-#
-# Authors
-#   Jeff Putsch <jdputsch@gmail.com>
-#

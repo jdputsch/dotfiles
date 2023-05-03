@@ -77,24 +77,6 @@ if [[ -n "${ZSH}" ]]; then
     export PATH=$(${ZSH} -l -c "echo \${PATH}")
 fi
 
-for d in ${HOME}/.pyenv-${DistroBasedOn}-${MAJOR_REV} \
-         ${HOME}/.pyenv; do
-    if [[ -d ${d} ]]; then 
-        export PYENV_ROOT=${d}
-        break
-    fi
-done
-
-if [ -x ${PYENV_ROOT}/bin/pyenv ]; then
-    if [[ :$PATH: != *:${PYENV_ROOT}/bin:* ]]; then
-        export PATH=${PYENV_ROOT}/bin:${PATH}
-    fi
-    if [[ :$PATH: != *:${PYENV_ROOT}/shims:* ]]; then
-        eval "$(${PYENV_ROOT}/bin/pyenv init --path)"
-    fi
-    eval "$(${PYENV_ROOT}/bin/pyenv init -)"
-fi
-
 export COLUMNS="120"
 
 export PATH="$PATH:/home/jputsch/apps/acli/10.2.0/linux/7"

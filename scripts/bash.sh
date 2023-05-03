@@ -7,9 +7,7 @@ source "$(pwd)/scripts/util.sh"
 
 do_configure() {
 	info "[bash][configure] Create symlinks"
-	ln -sf "$(pwd)/bash/bashenv" "${HOME}/.bashenv"
-	ln -sf "$(pwd)/bash/bash_profile" "${HOME}/.bash_profile"
-	ln -sf "$(pwd)/bash/bashrc" "${HOME}/.bashrc"
+	info "[bash] Startup Files configured in 'ohmybash'"
 }
 
 main() {

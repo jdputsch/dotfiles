@@ -54,21 +54,6 @@ do_install_darwin() {
 	[ -x /opt/pkg/bin/bash ] || sudo pkgin -y install bash
 	info "[system] tmux"
 	[ -x /opt/pkg/bin/tmux ] || sudo pkgin -y install tmux
-
-	# Install pyenv
-	if [ ! -d ${HOME}/.pyenv ]; then
-	    (
-			info "[system] pyenv"
-			git clone --quiet https://github.com/pyenv/pyenv.git ~/.pyenv
-			export PYENV_ROOT=${HOME}/.pyenv
-			export PATH=${PYENV_ROOT}/bin:${PATH}
-			eval "$(pyenv init -)"
-			info "[system] pyenv-vitualenv"
-			git clone --quiet https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv
-			info "[system] pyenv-update"
-			git clone --quiet https://github.com/pyenv/pyenv-update.git $(pyenv root)/plugins/pyenv-update
-		)
-	fi
 }
 
 do_install() {

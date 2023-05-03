@@ -70,16 +70,16 @@ DISABLE_LS_COLORS="true"
 
 # Plugin configuration
 # Do not warn about mis-configured pyenv the plugin loads it.
-ZSH_PYENV_QUIET=true
+# ZSH_PYENV_QUIET=true
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-if [[ ${OS} = "darwin" ]]; then
-  plugins=(pyenv)
-fi
+# if [[ ${OS} = "darwin" ]]; then
+#   plugins=(pyenv)
+# fi
 
 source $ZSH/oh-my-zsh.sh
 
