@@ -24,7 +24,7 @@ system-configure: FORCE ## Configure system packages
 git: FORCE ## Configure git
 	@./scripts/git.sh configure
 
-terminal: tmux bash csh zsh ohmyzsh ## Setup the terminal
+terminal: tmux bash csh zsh ohmyzsh ohmybash ## Setup the terminal
 tmux: FORCE ## Configure tmux
 	@./scripts/tmux.sh configure
 bash: FORCE ## Configure bash
@@ -38,6 +38,11 @@ ohmyzsh-install: system-install FORCE ## Install Oh My Zsh
 	@$(BASH) ./scripts/ohmyzsh.sh install
 ohmyzsh-configure: FORCE ## Configure Oh My Zsh
 	@$(BASH) ./scripts/ohmyzsh.sh configure
+ohmybash: ohmybash-install ohmybash-configure ## Install and configure Oh My Bash
+ohmybash-install: system-install FORCE ## Install Oh My Bash
+	@$(BASH) ./scripts/ohmybash.sh install
+ohmybash-configure: FORCE ## Configure Oh My Bash
+	@$(BASH) ./scripts/ohmybash.sh configure
 
 emacs: FORCE ## Configure emacs
 	@./scripts/emacs.sh configure

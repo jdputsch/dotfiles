@@ -5,11 +5,11 @@
         followTags = true
 
 [diff]
-        tool = p4merge
+	tool = p4merge
 [difftool]
         prompt = false
 [merge]
-        tool = p4merge
+	tool = p4merge
 [mergetool]
         prompt = false
         keepBackup = false
@@ -23,3 +23,9 @@
 
 [alias]
 	prune-branches = "!git fetch -p && git branch -vv | grep ': gone]' |  grep -v \"\\*\" | awk '{ print $1; }' | xargs -r git branch -d"
+[merge "tool.bcomp"]
+	trustExitCode = true
+[safe]
+	directory = /workspace
+[init]
+	defaultBranch = main
