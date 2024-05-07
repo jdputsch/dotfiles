@@ -1,0 +1,31 @@
+[user]
+	email = jputsch@analog.com
+	name = Jeff Putsch
+[push]
+        followTags = true
+
+[diff]
+	tool = p4merge
+[difftool]
+        prompt = false
+[merge]
+	tool = p4merge
+[mergetool]
+        prompt = false
+        keepBackup = false
+
+# [credential]
+#         helper = 
+#         helper = /home/jputsch/apps/github/gcm/linux/7/2.0.696/git-credential-manager-core
+#         credentialStore = gpg
+[credential "https://dev.azure.com"]
+        useHttpPath = true
+
+[alias]
+	prune-branches = "!git fetch -p && git branch -vv | grep ': gone]' |  grep -v \"\\*\" | awk '{ print $1; }' | xargs -r git branch -d"
+[merge "tool.bcomp"]
+	trustExitCode = true
+[safe]
+	directory = /workspace
+[init]
+	defaultBranch = main

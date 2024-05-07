@@ -161,6 +161,12 @@ do_configure() {
         ln -sf $f ${HOME}/lib/$(basename $f)
     done
 
+    info "[system][configure] Install \$HOME/libexec dir"
+    [ -d $HOME/libexec ] || mkdir -p $HOME/libexec
+    for f in $( ls $(pwd)/system/home_libexec.d 2>/dev/null ); do
+        ln -sf $f ${HOME}/libexec/$(basename $f)
+    done
+
     info "[system][configure] Setup ADI modules"
     if type -t module >/dev/null 2>&1; then
         module unload git
