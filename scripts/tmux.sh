@@ -8,7 +8,7 @@ source "$(pwd)/scripts/util.sh"
 do_configure() {
 	info "[tmux] Configure"
 	info "[tmux][configure] Download tpm plugin manager"
-	if [[ ! -d "${HOME}/.tmux/plugins/tpm" ]]; then
+	if type -P git >/dev/null 2>&1 && [[ ! -d "${HOME}/.tmux/plugins/tpm" ]]; then
 		git clone --quiet https://github.com/tmux-plugins/tpm "${HOME}/.tmux/plugins/tpm"
 	fi
 

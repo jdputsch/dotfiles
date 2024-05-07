@@ -50,11 +50,11 @@ main() {
 	case $command in
 	"install")
 		shift
-		do_install "$@"
+		type -P zsh >/dev/null 2>&1 && do_install "$@" || info "[ohmyzsh] Skipping install - zsh not available."
 		;;
 	"configure")
 		shift
-		do_configure "$@"
+		type -P zsh >/dev/null 2>&1 && do_configure "$@" || info "[ohmyzsh] Skipping configure - zsh not available."
 		;;
 	*)
 		error "$(basename "$0"): '$command' is not a valid command"

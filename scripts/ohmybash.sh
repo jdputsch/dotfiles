@@ -38,6 +38,9 @@ do_configure() {
 	info "[ohmybash][configure] Make custom dirs"
 	info "[ohmybash][configure] Install customizations"
 	mkdir -p ${BASH_CUSTOM}/lib
+	for d in $(find $(pwd)/bash/oh-my-bash/custom -type d); do
+        mkdir -p "${BASH_CUSTOM}/${d#*oh-my-bash/custom}"
+    done
 	for f in $(find $(pwd)/bash/oh-my-bash/custom -type f); do
 	    ln -sf "${f}" "${BASH_CUSTOM}/${f#*oh-my-bash/custom/}"
 	done
@@ -48,11 +51,11 @@ main() {
 	case $command in
 	"install")
 		shift
-		do_install "$@"
+		type -P git >/dev/null 2>&1 && do_install "$@" || info "[ohmybash] Skipping install - git not available."
 		;;
 	"configure")
 		shift
-		do_configure "$@"
+		type -P git >/dev/null 2>&1 && do_configure "$@" || info "[ohmybash] Skipping configure - git not available."
 		;;
 	*)
 		error "$(basename "$0"): '$command' is not a valid command"

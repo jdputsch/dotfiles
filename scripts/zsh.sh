@@ -15,7 +15,7 @@ main() {
 	case $command in
 	"configure")
 		shift
-		do_configure "$@"
+		type -P zsh >/dev/null 2>&1 && do_configure "$@" || info "[zsh] Skipping configure - zsh not available"
 		;;
 	*)
 		error "$(basename "$0"): '$command' is not a valid command"
