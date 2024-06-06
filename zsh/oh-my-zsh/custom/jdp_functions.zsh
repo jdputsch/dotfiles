@@ -4,3 +4,11 @@ if [[ ${OS} = linux ]] && [[ -x /usr/sepp/bin/git ]]; then
         /usr/sepp/bin/git "$@"
     }
 fi
+
+# Shutdown shared ssh connections (controlmasters)
+function stop_ssh_cms() {
+    for f in $HOME/.ssh/controlmasters/*; do
+        host=${${f##*/}%:22}
+        ssh -O exit $host 
+    done
+done
