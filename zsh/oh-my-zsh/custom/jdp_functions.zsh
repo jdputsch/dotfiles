@@ -11,4 +11,32 @@ function stop_ssh_cms() {
         host=${${f##*/}%:22}
         ssh -O exit $host 
     done
-done
+}
+
+# NVM / Node.js functions
+lazynvm() {
+  unset -f nvm node npm
+  # export NVM_DIR=~/.nvm
+  . /opt/local/share/nvm/init-nvm.sh
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+}
+
+nvm() {
+  lazynvm 
+  nvm $@
+}
+ 
+node() {
+  lazynvm
+  node $@
+}
+ 
+npm() {
+  lazynvm
+  npm $@
+}
+
+npx() {
+  lazynvm
+  npx $@
+}

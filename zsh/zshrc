@@ -81,6 +81,8 @@ DISABLE_LS_COLORS="true"
 #   plugins=(pyenv)
 # fi
 
+plugins=(nvm)
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration

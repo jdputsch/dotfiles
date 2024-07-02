@@ -40,17 +40,24 @@ DOTZSH_ORIG_PATH=${PATH}
 # TODO move to x11/paths.zsh (or env.zsh)
 export XENVIRONMENT=${HOME}/.Xdefaults
 
-# Source ${$HOME}/.zshrc, even in non-interactive shells
-# if [[ ! -o interactive ]];  then
-#     [[ -f ${HOME}/.zshrc ]] && source ${HOME}/.zshrc
-# fi
-
 # Set platform specific variables
 PLAT=""
 if [ -z "${DistroBasedOn}" ] && [ -f ${DOTFILES}/scripts/identify_platform.sh ]; then
     . ${DOTFILES}/scripts/identify_platform.sh
     PLAT=${DistroBasedOn}-${MAJOR_REV}-${MACH}
 fi
+
+# Setup XDG environment variables
+export XDG_CONFIG_HOME="$HOME"/.config
+export XDG_DATA_HOME="$HOME"/.local/share
+export XDG_CACHE_HOME="$HOME"/.cache
+
+# Setup Rust CARGO and RUSTUP locations
+export CARGO_HOME="$XDG_DATA_HOME"/cargo
+export RUSTUP_HOME="$XDG_DATA_HOME"/rustup
+
+# Setup Go locations
+export GOPATH="$XDG_DATA_HOME"/go
 
 # Places we may need to set the SHELL environment variable
 if [[ ${OS} = linux ]]; then
@@ -89,24 +96,22 @@ else
     # is not ascii/numeric anymore. therfore, we'll emulate it here.
     
     # # Set the list of directories that man searches for manuals.
-    if [[ $OSTYPE = darwin* ]] && [[ -f /etc/manpaths ]]; then
-        manpath=($(cat /etc/manpaths))
-    else
+    if [[ $OSTYPE != darwin* ]]; then
         manpath=(
           /usr/local/share/man
           /usr/share/man
           $manpath
-    )
+        )
+      for path_file in /etc/manpaths.d/*(.N); do
+        manpath+=($(<$path_file))
+      done
+      unset path_file
     fi
     
-    for path_file in /etc/manpaths.d/*(.N); do
-      manpath+=($(<$path_file))
-    done
-    unset path_file
     
     # Set the list of directories that Zsh searches for programs.
-    if [[ $OSTYPE = darwin* ]] && [[ -f /etc/paths ]]; then
-    	path=($(cat /etc/paths) ~/bin)
+    if [[ $OSTYPE = darwin* ]] && [ -x /usr/libexec/path_helper ]; then
+    	eval `/usr/libexec/path_helper -s`
     else
         path=(
           /usr/local/{bin,sbin}
@@ -115,18 +120,18 @@ else
           ~/bin
           $path
         )
+      for path_file in /etc/paths.d/*(.N); do
+        path+=($(<$path_file))
+      done
+      unset path_file
     fi
     
-    for path_file in /etc/paths.d/*(.N); do
-      path+=($(<$path_file))
-    done
-    unset path_file
-    
-    for path_file in ${HOME}/.paths.d/*(.N); do
+    # Add personal, custom paths
+    for path_file in ${HOME}/.paths.d/*(@N,.N); do
       [ -e $HOME/ZSH_DEBUG ] && echo ".zshenv: settings paths from $path_file" >> $HOME/ZSH_DEBUG
        for path_elem in $(cat ${path_file}); do
-           if [ -d ${path_elem} ]; then
-               path+=(${path_elem})
+           if [ -d ${(e)path_elem} ]; then
+               path+=(${(e)path_elem})
            fi
        done
        unset path_elem

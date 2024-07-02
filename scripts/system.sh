@@ -148,6 +148,9 @@ do_configure() {
             ln -sf $f ${HOME}/.paths.d/$(basename $f)
         done
     fi
+    for f in $(pwd)/system/paths.d/*; do
+        ln -sf $f ${HOME}/.paths.d/$(basename $f)
+    done
 
     info "[system][configure] Install \$HOME/etc dir"
     [ -d $HOME/etc ] || mkdir -p $HOME/etc
