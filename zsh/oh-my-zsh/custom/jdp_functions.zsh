@@ -7,10 +7,14 @@ fi
 
 # Shutdown shared ssh connections (controlmasters)
 function stop_ssh_cms() {
-    for f in $HOME/.ssh/controlmasters/*; do
-        host=${${f##*/}%:22}
-        ssh -O exit $host 
-    done
+    if [ -n "$1" ]; then
+        ssh -O exit $1
+    else
+        for f in $HOME/.ssh/controlmasters/*; do
+            host=${${f##*/}%:22}
+            ssh -O exit $host 
+        done
+    fi
 }
 
 # NVM / Node.js functions
