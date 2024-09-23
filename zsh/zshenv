@@ -26,18 +26,14 @@ export DOTZSH=${${(%):-%N}:A:h} # and I though perl was baud-barf...
                                 # ${(%):-%N} -> path to this script
                                 # :A:h -> resolves symlinks, then gets parent
                                 # See zshexpn(1), section HISTORY EXPANSION
-export DOTZSH_CUSTOM=${DOTZSH}/custom
-
 export DOTZSH_VERSION=$(/usr/bin/head -1 "$DOTZSH/_version")
 
 export DOTFILES=${DOTZSH:h}
-
 
 # Save current PATH environment variable, incase we need it later
 DOTZSH_ORIG_PATH=${PATH}
 
 # Basic X11 environment settings
-# TODO move to x11/paths.zsh (or env.zsh)
 export XENVIRONMENT=${HOME}/.Xdefaults
 
 # Set platform specific variables
@@ -68,6 +64,9 @@ if [[ ${OS} = linux ]]; then
     fi
 fi
 
+## Do not use Apple specific shell sessions
+SHELL_SESSIONS_DISABLE=1
+
 # If modules is available, use it, else manage key paths here
 if [ -f /usr/cadtools/bin/modules.dir/Shrc ]; then
     if [[ -o login ]]; then
@@ -95,31 +94,32 @@ else
     # use path helper anymore: on APFS, the order of files read from /etc/paths.d
     # is not ascii/numeric anymore. therfore, we'll emulate it here.
     
-    # # Set the list of directories that man searches for manuals.
-    if [[ $OSTYPE != darwin* ]]; then
-        manpath=(
-          /usr/local/share/man
-          /usr/share/man
-          $manpath
-        )
-      for path_file in /etc/manpaths.d/*(.N); do
-        manpath+=($(<$path_file))
-      done
-      unset path_file
-    fi
     
     
     # Set the list of directories that Zsh searches for programs.
     if [[ $OSTYPE = darwin* ]] && [ -x /usr/libexec/path_helper ]; then
     	eval `/usr/libexec/path_helper -s`
     else
-        path=(
-          /usr/local/{bin,sbin}
-          /usr/{bin,sbin}
-          /{bin,sbin}
-          ~/bin
-          $path
-        )
+      # Set the list of directories that man searches for manuals.
+      if [[ $OSTYPE != darwin* ]]; then
+          manpath=(
+            /usr/local/share/man
+            /usr/share/man
+            $manpath
+          )
+        for path_file in /etc/manpaths.d/*(.N); do
+          manpath+=($(<$path_file))
+        done
+        unset path_file
+      fi
+      # Now set path entries
+      path=(
+        /usr/local/{bin,sbin}
+        /usr/{bin,sbin}
+        /{bin,sbin}
+        ~/bin
+        $path
+      )
       for path_file in /etc/paths.d/*(.N); do
         path+=($(<$path_file))
       done
@@ -163,8 +163,30 @@ fi
 
 # Language
 if [[ -z "$LANG" ]]; then
-  eval "$(locale)"
+  def_locale=$(locale -a | egrep 'en.*US.*UTF-8')
+  if [[ -n "$def_locale" ]]; then
+    export LANG=$def_locale
+  else
+    export LANG=C
+  fi
 fi
+
+## Set P4 environment variables based on the platform & host
+if [[ ${OS} = "darwin" ]] && [[ $HOST = JPUTSCH-MX01* ]]; then
+    export P4CONFIG=.p4config
+    export P4PORT=sjp4edge1.adsiv.analog.com:1666
+    export P4USER=jputsch
+
+    if [ -x /Applications/p4merge.app/Contents/MacOS/p4merge ]; then
+        p4merge() {
+            /Applications/p4merge.app/Contents/MacOS/p4merge "$@"
+        }
+    fi
+fi
+
+## PIP behavior, for python
+# require virtualenv for using pip
+export PIP_REQUIRE_VIRTUALENV=true
 
 # # Browser (Default)
 # if [[ "$OSTYPE" == darwin* ]]; then

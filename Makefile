@@ -24,7 +24,7 @@ system-configure: FORCE ## Configure system packages
 git: FORCE ## Configure git
 	@./scripts/git.sh configure
 
-terminal: tmux bash csh zsh ohmyzsh ohmybash ## Setup the terminal
+terminal: tmux bash csh zsh bash ## Setup the terminal
 tmux: FORCE ## Configure tmux
 	@./scripts/tmux.sh configure
 bash: FORCE ## Configure bash

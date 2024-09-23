@@ -5,9 +5,30 @@ set -e
 # shellcheck source=../scripts/util.sh
 source "$(pwd)/scripts/util.sh"
 
+ZSH_CUSTOM="${HOME}/.dotfiles/zsh"
+
 do_configure() {
 	info "[zsh] Configure"
-	info "[zsh] Startup Files configured in 'ohmyzsh'"
+	info "[zsh] Startup Files configured in 'zsh'"
+
+	# List of ZSH plugins to install. Plugin entry format:
+	#   ["plugins/<name>"]="URL for git clone"
+	declare -A plugins=(
+	)
+	for path in "${!plugins[@]}"; do
+		if [[ ! -d "${ZSH_CUSTOM}/$path" ]]; then
+			git clone --quiet "${plugins[$path]}" "${ZSH_CUSTOM}/$path"
+		fi
+	done
+
+	info "[zsh][configure] Create symlinks"
+	ln -sf "$(pwd)/zsh/zlogin" "${HOME}/.zlogin"
+	ln -sf "$(pwd)/zsh/zlogout" "${HOME}/.zlogout"
+	ln -sf "$(pwd)/zsh/zprofile" "${HOME}/.zprofile"
+	ln -sf "$(pwd)/zsh/zshenv" "${HOME}/.zshenv"
+	ln -sf "$(pwd)/zsh/zshrc" "${HOME}/.zshrc"
+	info "[ohmyzsh][configure] Make custom dirs"
+
 }
 
 main() {
