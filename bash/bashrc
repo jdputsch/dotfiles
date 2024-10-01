@@ -7,16 +7,13 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
                                                  # we need to resolve it relative to the
                                                  # path where the symlink file was located
 done
-export DOTBASH="$( cd -P "$( dirname "$SOURCE" )" >/dev/null && pwd )"
-export DOTZSH="$( cd -P ${DOTBASH}/../zsh >/dev/null && pwd )"
-export DOTFILES=${DOTZSH%/*}
+export DOTBASH="$( cd -P "$( dirname "$SOURCE" )" >/dev/null && /bin/pwd )"
+export DOTFILES=${DOTBASH%/*}
+export DOTZSH="${DOTFILES}/zsh"
 
-# Set platform specific variables
-if [ -z "${DistroBasedOn}" ] && [ -f ${DOTFILES}/scripts/identify_platform.sh ]; then
-    . ${DOTFILES}/scripts/identify_platform.sh
-    PLAT=${DistroBasedOn}-${MAJOR_REV}-${MACH}
-else
-    PLAT=unknown
+# Store the original path in DOTBASH_ORIG_PATH if not already set
+if [[ -z "${DOTBASH_ORIG_PATH}" ]]; then
+    export DOTBASH_ORIG_PATH=${PATH}
 fi
 
 # Fix umask to a sane value if needed
@@ -24,13 +21,43 @@ if [[ $(umask) =~ ^[0]+$ ]]; then
     umask 022
 fi
 
-# Store the original path in DOTZSH_BASH_ORIG_PATH if not already set
-if [[ -z "${DOTZSH_BASH_ORIG_PATH}" ]]; then
-    export DOTZSH_BASH_ORIG_PATH=${PATH}
+# Emulate zsh and put environment settings in a $HOME/.bashenv file, loading it
+# before we do much else
+[[ -f ${HOME}/.bashenv ]] && . ${HOME}/.bashenv
+
+# If on WSL, set window title to reflect Linux flavor..
+if [[ -n ${PS1} ]] && grep -qi Microsoft /proc/version 2>/dev/null; then
+    echo -en "\033]0;${WSL_DISTRO_NAME%%-*}\a"
 fi
 
-# Set BASH_ENV
-export BASH_ENV=${HOME}/.bashenv
+# Look for a suitable zsh
+ZSH=""
+if ! type zsh >/dev/null 2>&1; then
+    if [ -x ${HOME}/apps/zsh/5.7.1/linux/7/bin/zsh ]; then
+        ZSH=${HOME}/apps/zsh/5.7.1/linux/7/bin/zsh
+    if [ -x ${HOME}/adi_modules/zsh/.default ] \
+        && [ -x ${HOME}/apps/zsh/$(${HOME}/adi_modules/zsh/.default)/linux/${MAJOR_REV}/bin/zsh ]; then
+        ZSH=${HOME}/apps/zsh/$(${HOME}/adi_modules/zsh/.default)/linux/${MAJOR_REV}/bin/zsh
+    elif [ -x ${HOME}/${PLAT}/bin/zsh ]; then
+        ZSH=${HOME}/${PLAT}/bin/zsh
+    elif [ -x /bin/zsh ]; then
+        ZSH=/bin/zsh
+    fi
+else
+    ZSH=$(type -p zsh)
+fi
+
+## We just switch to zsh for login shells if it is available.
+if [[ -n ${PS1} ]] && [[ -n "${ZSH}" ]] && [[ -z "${VSCODE}" ]] \
+    && ( shopt -q login_shell \
+        || [[ $(ps -o comm= $PPID) = *terminal ]] \
+        || [[ $(ps -o comm= $PPID) = konsole ]] \
+        || [[ $(ps -o comm= $PPID) = code ]] \
+        || [[ -n "${VSCODE_IPC_HOOK_CLI}" ]] \
+    ); then
+    export SHELL=${ZSH}
+    exec ${SHELL} -l
+fi
 
 # If modules is available, use it, else manage key paths here
 if [ -f /usr/cadtools/bin/modules.dir/Shrc ]; then
@@ -43,38 +70,8 @@ else
     fi
 fi
 
-# If on WSL, set window title to reflect Linux flavor..
-if [[ -n ${PS1} ]] && grep -qi Microsoft /proc/version 2>/dev/null; then
-    echo -en "\033]0;${WSL_DISTRO_NAME%%-*}\a"
-fi
+## If we're here, we're staying in bash. Set up the environment.
 
-# Look for a suitable zsh
-ZSH=""
-if [ -x ${HOME}/${PLAT}/bin/zsh ]; then
-    ZSH=${HOME}/${PLAT}/bin/zsh
-elif [ -x /bin/zsh ]; then
-    ZSH=/bin/zsh
-fi
-
-#
-# For now we just switch to ZSH on login shells
-#
-if [[ -n ${PS1} ]] && [[ -n "${ZSH}" ]] && [[ -z "${VSCODE}" ]] \
-    && ( shopt -q login_shell \
-        || [[ $(ps -o comm= $PPID) = *terminal ]] \
-        || [[ $(ps -o comm= $PPID) = konsole ]] \
-        || [[ $(ps -o comm= $PPID) = code ]] \
-        || [[ -n "${VSCODE_IPC_HOOK_CLI}" ]] \
-    ); then
-    export SHELL=${ZSH}
-    exec ${SHELL} -l
-fi
-
-# If we get here, we're being called by VS Code. 
-# 1. Setup search path to match, or closely enough match ZSH...
-if [[ -n "${ZSH}" ]]; then
-    export PATH=$(${ZSH} -l -c "echo \${PATH}")
-fi
 
 export COLUMNS="120"
 

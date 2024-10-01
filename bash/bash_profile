@@ -1,13 +1,5 @@
-# Source .bashrc
-
-echo "bash_profile loaded" >> /tmp/jputsch.bashrc
+## Just source .bashrc
+## See: https://shreevatsa.wordpress.com/2008/03/30/zshbash-startup-files-loading-order-bashrc-zshrc-etc/
+## and: https://superuser.com/questions/1840395/complete-overview-of-bash-and-zsh-startup-files-sourcing-order
 
 [ -f ${HOME}/.bashrc ] && . ${HOME}/.bashrc
-
-export COLUMNS="120"
-
-export PATH="$PATH:/home/jputsch/apps/acli/10.2.0/linux/7"
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
