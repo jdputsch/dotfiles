@@ -35,7 +35,7 @@ ZSH=""
 if ! type zsh >/dev/null 2>&1; then
     if [ -x ${HOME}/apps/zsh/5.7.1/linux/7/bin/zsh ]; then
         ZSH=${HOME}/apps/zsh/5.7.1/linux/7/bin/zsh
-    if [ -x ${HOME}/adi_modules/zsh/.default ] \
+    elif [ -x ${HOME}/adi_modules/zsh/.default ] \
         && [ -x ${HOME}/apps/zsh/$(${HOME}/adi_modules/zsh/.default)/linux/${MAJOR_REV}/bin/zsh ]; then
         ZSH=${HOME}/apps/zsh/$(${HOME}/adi_modules/zsh/.default)/linux/${MAJOR_REV}/bin/zsh
     elif [ -x ${HOME}/${PLAT}/bin/zsh ]; then
