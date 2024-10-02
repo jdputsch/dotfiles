@@ -2,13 +2,13 @@
 if [ -n "$1" ]; then
     for f in  $HOME/.ssh/controlmasters/*@$1*(N); do
         host=${${f##*/}%:22}
-        echo  -n "Stopping ${host} ..."
+        echo  -n "Stopping ${host} ... "
         ssh -O exit ${host}
     done
 else
     for f in $HOME/.ssh/controlmasters/*; do
         host=${${f##*/}%:22}
-        echo -n "Stopping ${host} ..."
+        echo -n "Stopping ${host} ... "
         ssh -O exit ${host} 
     done
 fi
