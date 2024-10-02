@@ -3,6 +3,9 @@
 # Set most, if not all, environment variables in .zshenv, which is sourced before .zshrc
 # for all zsh invocations.
 # 
+if [ -f ${HOME}/ZSH_PROFILE ]; then
+    zmodload zsh/zprof
+fi
 
 ## Setup fpath, autoload, and compinit
 fpath=(
@@ -90,3 +93,8 @@ export NVM_LAZY_LOAD=true
 # Optionally enable nvm lazy loading for other commands:
 # export NVM_LAZY_LOAD_EXTRA_COMMANDS=('vim')
 source ${DOTZSH}/plugins/zsh-nvm/zsh-nvm.plugin.zsh
+
+
+if [ -f ${HOME}/ZSH_PROFILE ]; then
+    zprof
+fi
