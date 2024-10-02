@@ -17,7 +17,9 @@ autoload -- ${DOTZSH}/functions/[^_]*(:t)
 
 ## Iniitialze completion system
 autoload -Uz compinit
-compinit
+compinit -C # Use cache to reduce startup time
+# Have another thread refresh the cache in the background (subshell to hide output)
+(autoload -Uz compinit; compinit &)
 
 ## zstyles - configure completion system
 # See https://thevaluable.dev/zsh-completion-guide-examples/ for descriptions of many
