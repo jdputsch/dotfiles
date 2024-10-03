@@ -5,6 +5,28 @@
 #   Jeff Putsch <jdputsch@gmail.com>
 #
 
+# Helper functions for managing paths
+pathappend() {
+  local path_var=$1 ; shift
+  for ARG in "$@"
+  do
+    if [ -d "$ARG" ] && [[ ":${!path_var}:" != *":$ARG:"* ]]; then
+        printf -v "${path_var}" '%s' "${!path_var:+${!path_var}:}$ARG"
+    fi
+  done
+}
+
+pathprepend() {
+  local path_var=$1 ; shift
+  for ((i=$#; i>0; i--));
+  do
+    ARG=${!i}
+    if [ -d "$ARG" ] && [[ ":${!path_var}:" != *":$ARG:"* ]]; then
+      printf -v "${path_var}" '%s' "${ARG}${!path_var:+:${!path_var}}"
+    fi
+  done
+}
+
 # Basic X11 environment settings
 export XENVIRONMENT=${HOME}/.Xdefaults
 
@@ -14,6 +36,7 @@ if [ -z "${DistroBasedOn}" ] && [ -f ${DOTFILES}/scripts/identify_platform.sh ];
     . ${DOTFILES}/scripts/identify_platform.sh
     PLAT=${DistroBasedOn}-${MAJOR_REV}-${MACH}
 fi
+
 
 # Setup XDG environment variables
 export XDG_CONFIG_HOME="$HOME"/.config
@@ -45,91 +68,62 @@ if [ -f /usr/cadtools/bin/modules.dir/Shrc ]; then
       . /usr/cadtools/bin/modules.dir/Shrc
     fi
 else
-    # Paths - make sure these have unique entries, then set default vaules
-    typeset -gU cdpath fpath mailpath manpath path
-    typeset -gUT INFOPATH infopath
-    
     # Set the the list of directories that cd searches.
-    cdpath=(
-      $cdpath
-    )
-    
+    export CDPATH=""
+
     # Set the list of directories that `info` searches for manuals.
-    infopath=(
-      /usr/local/share/info
-      /usr/share/info
-      $infopath
-    )
+    export INFOPATH
+    pathprepend INFOPATH /usr/local/share/info /usr/share/info
     
     # OSX has a path helper (/usr/libexec/path_helper) to set PATH and MANPATH
     # variables, normally I would use it, but I use APFs on Mac, therefore I don't
     # use path helper anymore: on APFS, the order of files read from /etc/paths.d
     # is not ascii/numeric anymore. therfore, we'll emulate it here.
-    
-    
-    
-    # Set the list of directories that Zsh searches for programs.
+        
+    # Set the list of directories that bash searches for programs.
     if [[ $OSTYPE = darwin* ]] && [ -x /usr/libexec/path_helper ]; then
     	eval `/usr/libexec/path_helper -s`
     else
       # Set the list of directories that man searches for manuals.
       if [[ $OSTYPE != darwin* ]]; then
-          manpath=(
-            /usr/local/share/man
-            /usr/share/man
-            $manpath
-          )
-        for path_file in /etc/manpaths.d/*(.N); do
-          manpath+=($(<$path_file))
+        export MANPATH
+        pathprepend MANPATH /usr/local/share/man /usr/share/man
+        for path_file in $(ls /etc/manpaths.d/* | sort); do
+          pathappend MANPATH $(<$path_file)
         done
-        unset path_file
       fi
       # Now set path entries
-      path=(
-        /usr/local/{bin,sbin}
-        /usr/{bin,sbin}
-        /{bin,sbin}
-        ~/bin
-        $path
-      )
-      for path_file in /etc/paths.d/*(.N); do
-        path+=($(<$path_file))
+      pathprepend PATH /usr/local/{bin,sbin} /usr/{bin,sbin} /{bin,sbin} ~/bin
+      for path_file in $(ls /etc/paths.d/* | sort); do
+        pathappend PATH $(<$path_file)
       done
-      unset path_file
     fi
     
     # Add personal, custom paths
-    for path_file in ${HOME}/.paths.d/*(@N,.N); do
-      [ -e $HOME/ZSH_DEBUG ] && echo ".zshenv: settings paths from $path_file" >> $HOME/ZSH_DEBUG
-       for path_elem in $(cat ${path_file}); do
-           if [ -d ${(e)path_elem} ]; then
-               path+=(${(e)path_elem})
-           fi
-       done
-       unset path_elem
+    for path_file in $(ls ${HOME}/.paths.d/* | sort); do
+      [ -e $HOME/BASH_DEBUG ] && echo ".bashenv: settings paths from $path_file" >> $HOME/BASH_DEBUG
+      pathappend PATH $(<$path_file)
     done
     unset path_file
     
     # Move some path elements to the beginning of our search path
     if [ -n "${PLAT}" ] && [ -d ${HOME}/${PLAT}/bin ]; then
-        path=( ${HOME}/${PLAT}/bin $path)
+        PATH=$(echo $PATH | tr : \\012 | grep -v ^${HOME}/${PLAT}/bin | tr \\012 :)
+        pathprepend PATH ${HOME}/${PLAT}/bin
     fi
     
     # Remove path elements that start with "/tmp/" -- a Maxim/Linux artifact:
-    path=("${(@)path:#/tmp/*}")
+    PATH=$(echo $PATH | tr : \\012 | grep -v ^/tmp/ | tr \\012 :)
+
 
     # MacOSX
     if [[ "$OSTYPE" = darwin*  && -d /opt/pkg ]]; then
-      infopath=(
-        $infopath
-        /opt/pkg/info
-      )
+      pathappend INFOPATH /opt/pkg/info
     fi
     
     # Linux
     if [[ "$OSTYPE" = linux* ]]; then
-        [[ -d /usr/sepp/man ]] && manpath=($manpath /usr/sepp/man)
-        [[ -d /home/tekcad/local/man ]] && manpath=($manpath /home/tekcad/local/man)
+        pathappend MANPATH /usr/sepp/man /home/tekcad/local/man
     fi
 fi
 
@@ -167,5 +161,5 @@ export PIP_REQUIRE_VIRTUALENV=true
 
 # local Variables:
 # mode: sh
-# eval: (sh-set-shell "zsh")
+# eval: (sh-set-shell "bash")
 # End:
