@@ -172,9 +172,9 @@ if [[ -z "$LANG" ]]; then
 fi
 
 ## Set P4 environment variables based on the platform & host
-if [[ ${OS} = "darwin" ]] && [[ $HOST = JPUTSCH-MX01* ]]; then
+if [[ ${OS} = "darwin" ]] && [[ $HOST = JPUTSCH-M01* ]]; then
     export P4CONFIG=.p4config
-    export P4PORT=sjp4edge1.adsiv.analog.com:1666
+    export P4PORT=p4e.adsiv.analog.com:1666
     export P4USER=jputsch
 
     if [ -x /Applications/p4merge.app/Contents/MacOS/p4merge ]; then
