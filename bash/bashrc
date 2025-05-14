@@ -82,3 +82,5 @@ case $- in
   *i*) ;;
     *) return;;
 esac
+
+. "$HOME/.local/share/../bin/env"

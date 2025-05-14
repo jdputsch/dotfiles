@@ -3,3 +3,5 @@
 ## and: https://superuser.com/questions/1840395/complete-overview-of-bash-and-zsh-startup-files-sourcing-order
 
 [ -f ${HOME}/.bashrc ] && . ${HOME}/.bashrc
+
+. "$HOME/.local/share/../bin/env"

@@ -3,20 +3,17 @@
 	name = Jeff Putsch
 [push]
         followTags = true
+	autoSetupRemote = true
 
 [diff]
-#	tool = p4merge
 	tool = bc
 [difftool]
-        prompt = false
+	prompt = false
 [merge]
-#	tool = p4merge
 	tool = bc
-[merge "tool.bcomp"]
-	trustExitCode = true
 [mergetool]
-        prompt = false
-        keepBackup = false
+	prompt = false
+	keepBackup = false
 
 # [credential]
 #         helper = 
@@ -26,10 +23,27 @@
         useHttpPath = true
 
 [alias]
-	prune-branches = "!git fetch -p && git branch -vv | grep ': gone]' |  grep -v \"\\*\" | awk '{ print $1; }' | xargs -r git branch -d"
+	prune-branches = "!git fetch -p && git branch -vv | grep ': gone]' |  grep -v \"\\*\" | awk '{ print $1; }' | xargs -r git branch -D"
+	dt = "difftool --dir-diff --no-symlinks"
 [safe]
 	directory = /workspace
 [init]
 	defaultBranch = main
 [mergetool "bc"]
 	trustExitCode = true
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/env gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[core]
+	excludesfile = /Users/Jeff.Putsch/.gitignore_global
+[diff "tool"]
+	trustExitCode = true
+[merge "tool"]
+	trustExitCode = true
+[difftool "p4merge"]
+	path = /Applications/p4merge.app/Contents/Resources/launchp4merge
+[mergetool "p4merge"]
+	path = /Applications/p4merge.app/Contents/Resources/launchp4merge
