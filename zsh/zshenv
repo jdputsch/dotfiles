@@ -193,6 +193,9 @@ export PIP_REQUIRE_VIRTUALENV=true
 #   export BROWSER='open'
 # fi
 
+# Bartib (time tracker) data file location:
+export BARTIB_FILE="${HOME}/log/bartib/activity.bartib"
+
 # local Variables:
 # mode: sh
 # eval: (sh-set-shell "zsh")

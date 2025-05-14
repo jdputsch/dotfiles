@@ -170,6 +170,16 @@ do_configure() {
         ln -sf $f ${HOME}/libexec/$(basename $f)
     done
 
+    info "[system][configure] Install \$HOME/log dir"
+    [ -d $HOME/log ] || mkdir -p $HOME/log
+    for f in $(find $(pwd)/system/home_log.d -type f 2>/dev/null); do
+        logdir=$(dirname "${HOME}/log/${f#*log.d/}")
+        fname=$(basename $f)
+        mkdir -p "${logdir}"
+        ln -sf $f "${logdir}/${fname}"
+    done
+
+
     info "[system][configure] Setup ADI modules"
     if type -t module >/dev/null 2>&1; then
         module unload git
