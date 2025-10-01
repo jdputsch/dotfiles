@@ -131,11 +131,13 @@ do_configure() {
 
     info "[system] Configure"
 
-    info "[system][configure][directories] User binaries directory"
-    mkdir -p "${HOME}/bin"
-    chmod 0755 "${HOME}/bin"
+    for dir in bin etc lib libexec log src tmp; do
+        info "[system][configure][directories] User $dir directory"
+        mkdir -p "${HOME}/${dir}"
+        chmod 0755 "${HOME}/${dir}"
+    done
 
-    ( hostname | grep -v -q engitar.analog.com && do_fonts ) || info "[system][configure](fonts) - Skipping in ITAR pods"
+    ( hostname | egrep -v -q '(engitar.analog.com|eng.analogfed.com)' && do_fonts ) || info "[system][configure](fonts) - Skipping in ITAR pods"
 
     info "[system][configure] Install \$HOME/.paths.d dir"
     if [[ -L $HOME/.paths.d ]] \
