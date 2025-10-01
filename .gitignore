@@ -8,3 +8,6 @@
 
 # ignore uuid files in fonts directories
 *.uuid
+
+# ignore bartib file
+system/home_log.d/bartib

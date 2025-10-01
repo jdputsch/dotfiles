@@ -54,6 +54,8 @@ export RUSTUP_HOME="$XDG_DATA_HOME"/rustup
 
 # Setup Go locations
 export GOPATH="$XDG_DATA_HOME"/go
+if [[ ${OS} = linux ]]; then
+fi
 
 # Places we may need to set the SHELL environment variable
 if [[ ${OS} = linux ]]; then
