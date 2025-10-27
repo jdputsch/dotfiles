@@ -70,9 +70,11 @@ do_configure() {
 
     info "[system][configure] Install \$HOME/etc dir"
     [ -d $HOME/etc ] || mkdir -p $HOME/etc
-    for f in $(pwd)/system/home_etc.d/*; do
-        ln -sf $f ${HOME}/etc/$(basename $f)
-    done
+    if [ -d $(pwd)/system/home_etc.d ]; then
+        for f in $(pwd)/system/home_etc.d/*; do
+            ln -sf $f ${HOME}/etc/$(basename $f)
+        done
+    fi
 
     info "[system][configure] Install \$HOME/lib dir"
     [ -d $HOME/lib ] || mkdir -p $HOME/lib
