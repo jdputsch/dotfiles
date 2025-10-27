@@ -11,7 +11,7 @@ else
 BASH=/usr/bin/bash
 endif
 
-all: system git x11 terminal emacs ## Install and configure everything (default)
+all: system git fonts x11 terminal emacs ## Install and configure everything (default)
 help: ## Display help
 	@grep -hE '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
@@ -24,30 +24,17 @@ system-configure: FORCE ## Configure system packages
 git: FORCE ## Configure git
 	@./scripts/git.sh configure
 
-terminal: tmux bash csh zsh bash ## Setup the terminal
+terminal: tmux ## Setup the terminal
 tmux: FORCE ## Configure tmux
 	@./scripts/tmux.sh configure
-bash: FORCE ## Configure bash
-	@./scripts/bash.sh configure
-csh: FORCE ## Configure csh
-	@./scripts/csh.sh configure
-zsh: FORCE ## Configure zsh
-	@./scripts/zsh.sh configure
-ohmyzsh: ohmyzsh-install ohmyzsh-configure ## Install and configure Oh My Zsh
-ohmyzsh-install: system-install FORCE ## Install Oh My Zsh
-	@$(BASH) ./scripts/ohmyzsh.sh install
-ohmyzsh-configure: FORCE ## Configure Oh My Zsh
-	@$(BASH) ./scripts/ohmyzsh.sh configure
-ohmybash: ohmybash-install ohmybash-configure ## Install and configure Oh My Bash
-ohmybash-install: system-install FORCE ## Install Oh My Bash
-	@$(BASH) ./scripts/ohmybash.sh install
-ohmybash-configure: FORCE ## Configure Oh My Bash
-	@$(BASH) ./scripts/ohmybash.sh configure
 
 emacs: FORCE ## Configure emacs
 	@./scripts/emacs.sh configure
 
 x11: FORCE ## Configure X11
 	@./scripts/x11.sh configure
+	
+fonts: FORCE ## Install fonts
+	@./scripts/fonts.sh configure
 
 FORCE:

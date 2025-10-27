@@ -19,36 +19,9 @@ source "$(pwd)/scripts/identify_platform.sh"
 # shellcheck source=../scripts/util.sh
 source "$(pwd)/scripts/util.sh"
 
-case ${OS} in
-    darwin) FONTS_DIR="${HOME}/Library/Fonts" ;;
-    linux) FONTS_DIR="$HOME/.local/share/fonts" ;;
-    *) FONTS_DIR="$HOME/.local/share/fonts" ;;
-esac
-
 do_install_darwin() {
 	local install_dir
 	info "[system] Install Darwin (MacOS) specific items..."
-	info "[system] MacPorts"
-	if [ ! -x /opt/local/bin/port ]; then
-		install_dir=/tmp/ports
-		rm -rf ${install_dir} && mkdir -p ${install_dir}
-		(
-		    cd ${install_dir}
-		    os_version=$(sw_vers --productVersion)
-		    if [ $os_version = 14.* ]; then
-			    pkg__url=https://github.com/macports/macports-base/releases/download/v2.9.1/MacPorts-2.9.1-14-Sonoma.pkg
-			elif [ $os_version = 13.* ]; then
-			    pkg_url=https://github.com/macports/macports-base/releases/download/v2.9.1/MacPorts-2.9.1-13-Ventura.pkg
-			elif [ $os_version = 12.* ]; then
-			    pkg_url=https://github.com/macports/macports-base/releases/download/v2.9.1/MacPorts-2.9.1-12-Monterey.pkg
-			fi
-			pgk_file=$(basename $pkg_url)
-		    curl -O $pkg_url
-		    sudo installer -pkg $pkg_file -target /
-		)
-		rm -rf ${install_dir}
-	fi
-	info "[system] git"
 	[ -x /opt/local/bin/git ] || sudo port install git
 	info "[system] bash"
 	[ -x /opt/local/bin/bash ] || sudo port install bash
@@ -59,66 +32,9 @@ do_install_darwin() {
 do_install() {
 	info "[system] Install"
 	case ${OS} in
-	    darwin) do_install_darwin ;;
+	    darwin) echo do_install_darwin ;;
 	    *) info "[system]     ... currently nothing to do" ;;
 	esac
-}
-
-do_fonts() {
-    local install_dir
-
-    info "[system][configure][directories] User Fonts"
-    mkdir -p "${FONTS_DIR}"
-    chmod 0755 "${FONTS_DIR}"
-
-    info "[system][configure][fonts] Install IBM Plex fonts"
-    install_dir="/tmp/ibm-plex"
-    rm -rf "${install_dir}" && mkdir -p "${install_dir}"
-    (
-        cd "${install_dir}"
-        curl -L -f -O https://github.com/IBM/plex/releases/download/v6.0.2/OpenType.zip
-        unzip OpenType.zip
-        cd OpenType
-        find ./IBM-Plex-{Mono,Sans,Serif} -type f -name '*.otf' -exec cp -n "{}" "${FONTS_DIR}" \;
-    ) >/dev/null
-    rm -rf "${install_dir}"
-
-    info "[system][configure][fonts] Install Barlow fonts"
-    install_dir="/tmp/barlow"
-    rm -rf "${install_dir}" && mkdir -p "${install_dir}"
-    (
-        cd "${install_dir}"
-        curl -L -f -O https://github.com/jpt/barlow/archive/master.zip
-        unzip master.zip
-        find . -type f -name '*.otf' -exec cp -n "{}" "${FONTS_DIR}" \;
-    ) >/dev/null
-    rm -rf "${install_dir}"
-
-    info "[system][configure][fonts] Install FontAwesome fonts"
-    install_dir="/tmp/font_awesome"
-    rm -rf "${install_dir}" && mkdir -p "${install_dir}"
-    (
-        cd "${install_dir}"
-        curl -s -L -f -O https://use.fontawesome.com/releases/v6.1.1/fontawesome-free-6.1.1-desktop.zip
-        unzip fontawesome-free-6.1.1-desktop.zip
-        find . -type f -name '*.otf' -exec cp -n "{}" "${FONTS_DIR}" \;
-    ) >/dev/null
-    rm -rf "${install_dir}"
-
-    info "[system][configure][fonts] Install JetBrains Mono fonts"
-    install_dir="/tmp/jb_mono"
-    rm -rf "${install_dir}" && mkdir -p "${install_dir}"
-    (
-        cd "${install_dir}"
-        curl -s -L -f -O https://download.jetbrains.com/fonts/JetBrainsMono-2.242.zip
-        unzip JetBrainsMono-2.242.zip
-        find . -type f -name '*.ttf' -exec cp -n "{}" "${FONTS_DIR}" \;
-    ) >/dev/null
-    rm -rf "${install_dir}"
-
-    if [ "${OS}" == linux ]; then
-        fc-cache -f
-    fi
 }
 
 do_configure() {
@@ -131,13 +47,11 @@ do_configure() {
 
     info "[system] Configure"
 
-    for dir in bin etc lib libexec log src tmp; do
+    for dir in .config bin etc lib libexec log src tmp; do
         info "[system][configure][directories] User $dir directory"
         mkdir -p "${HOME}/${dir}"
         chmod 0755 "${HOME}/${dir}"
     done
-
-    ( hostname | egrep -v -q '(engitar.analog.com|eng.analogfed.com)' && do_fonts ) || info "[system][configure](fonts) - Skipping in ITAR pods"
 
     info "[system][configure] Install \$HOME/.paths.d dir"
     if [[ -L $HOME/.paths.d ]] \
@@ -181,6 +95,23 @@ do_configure() {
         ln -sf $f "${logdir}/${fname}"
     done
 
+    info "[system][configure] Shell (csh, sh, zsh & bash) startup files"
+    info "[system][configure][[t]csh] .user.cshrc"
+    if is_adi_host; then
+		ln -sf "$(pwd)/csh/cshrc.user" "${HOME}/.cshrc.user"
+	fi
+    info "[system][configure][sh] .profile"
+    ln -sf "$(pwd)/sh/profile" "${HOME}/.profile"
+    info "[system][configure][bash] .bash_profile"
+    ln -sf "$(pwd)/bash/bash_profile" "${HOME}/.bash_profile"
+    info "[system][configure][zsh] .zprofile"
+    ln -sf "$(pwd)/zsh/zprofile" "${HOME}/.zprofile"
+    info "[system][configure][common bash/zsh shell init] $HOME/.config/profile.d"
+    if [ -e ${HOME}/.config/profile.d ] && [ ! -h ${HOME}/.config/profile.d ]; then
+        rm -rf ${HOME}/.config/profile.d
+    elif [ ! -e ${HOME}/.config/profile.d ]; then
+        ln -sf "$(pwd)/config/profile.d" "${HOME}/.config/profile.d"
+    fi
 
     info "[system][configure] Setup ADI modules"
     if type -t module >/dev/null 2>&1; then

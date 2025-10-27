@@ -1,0 +1,8 @@
+# $HOME/.profile
+# the default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+# umask 022
+
+for file in "$HOME"/.config/profile.d/*.sh; do
+  . "$file"
+done

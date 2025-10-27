@@ -27,7 +27,6 @@ do_configure() {
 	ln -sf "$(pwd)/zsh/zprofile" "${HOME}/.zprofile"
 	ln -sf "$(pwd)/zsh/zshenv" "${HOME}/.zshenv"
 	ln -sf "$(pwd)/zsh/zshrc" "${HOME}/.zshrc"
-	info "[ohmyzsh][configure] Make custom dirs"
 
 }
 
