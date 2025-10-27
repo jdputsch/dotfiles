@@ -1,13 +1,3 @@
-#
-# Executes commands at login pre-zshrc.
-#
-# Authors:
-#   Jeff Putsch <jdputsch@gmail.com>
-#
+[ -r "$HOME"/.profile ] && source "$HOME"/.profile >/dev/null 2>&1
 
-# Customize to your needs...
-
-# Local Variables:
-# mode: sh
-# eval: (sh-set-shell "zsh")
-# End:
+[[ $- =~ i ]] && [ -r "$HOME"/.zshrc ] && source "$HOME"/.zshrc

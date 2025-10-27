@@ -1,0 +1,53 @@
+# functions/shell-specific/zsh/stop_ssh_cms
+# Description: Shutdown shared SSH connections (controlmasters) - Zsh optimized
+# Usage: stop_ssh_cms [hostname_pattern]
+# Compatibility: zsh only
+# Features: Uses zsh glob qualifiers and parameter expansion
+
+stop_ssh_cms() {
+    setopt local_options null_glob
+    
+    local socket_files
+    local host
+    local found_any=false
+    
+    if [ -n "$1" ]; then
+        # Stop specific host pattern using zsh glob qualifiers
+        socket_files=($HOME/.ssh/master-*@$1*(N))
+        
+        if [ ${#socket_files} -eq 0 ]; then
+            echo "No SSH control masters found matching pattern: $1"
+            return 1
+        fi
+        
+        for f in "${socket_files[@]}"; do
+            # Use zsh parameter expansion features
+            host=${${f##*/}%:22}      # Remove path and :22 suffix
+            host=${${host##*@}%:22}   # Remove everything up to @ and any remaining :22
+            
+            echo "Stopping ${host} ..."
+            ssh -O exit "${host}"
+            found_any=true
+        done
+    else
+        # Stop all control masters
+        socket_files=($HOME/.ssh/master-*(N))
+        
+        if [ ${#socket_files} -eq 0 ]; then
+            echo "No SSH control masters found"
+            return 0
+        fi
+        
+        for f in "${socket_files[@]}"; do
+            # Use zsh parameter expansion features
+            host=${${f##*/}%:22}      # Remove path and :22 suffix  
+            host=${${host##*@}%:22}   # Remove everything up to @ and any remaining :22
+            
+            echo "Stopping ${host} ..."
+            ssh -O exit "${host}"
+            found_any=true
+        done
+    fi
+    
+    [ "$found_any" = true ]
+}

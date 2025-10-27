@@ -1,0 +1,42 @@
+# functions/shell-specific/zsh/freload
+# Description: Reload zsh functions by name or reload all functions
+# Usage: freload [function_names...] (if no args, reloads all functions)
+# Compatibility: zsh only
+# Features: Uses zsh autoload and function management
+
+freload() {
+    if [ $# -eq 0 ]; then
+        # No arguments - reload all functions from fpath
+        local func_dirs=(
+            "${DOTFILES_DIR}/functions/shell-specific/zsh"
+            "${DOTFILES_DIR}/functions/extended"
+            "${DOTFILES_DIR}/functions/core"
+            "${DOTFILES_DIR}/zsh/functions"  # Legacy location
+        )
+        
+        for func_dir in "${func_dirs[@]}"; do
+            if [ -d "$func_dir" ]; then
+                for func_file in "$func_dir"/*; do
+                    if [ -f "$func_file" ]; then
+                        local func_name="$(basename "$func_file")"
+                        case "$func_name" in
+                            .*|*~|*.bak|*.orig) continue ;;
+                        esac
+                        # Unload if already loaded, then autoload
+                        unfunction "$func_name" 2>/dev/null
+                        autoload -Uz "$func_name"
+                    fi
+                done
+            fi
+        done
+        echo "freload: Reloaded all functions"
+    else
+        # Reload specific functions named as arguments
+        while [ $# -gt 0 ]; do
+            unfunction "$1" 2>/dev/null
+            autoload -Uz "$1"
+            shift
+        done
+        echo "freload: Reloaded specified functions"
+    fi
+}

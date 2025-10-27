@@ -1,0 +1,48 @@
+#!/bin/sh
+# completions/core/bartib-data
+# Description: Shared data functions for bartib completions
+# Usage: Sourced by bartib completion scripts
+# Compatibility: sh, bash, zsh
+
+# Source the completion utilities
+. "${DOTFILES_DIR}/completions/core/completion-utils"
+
+# Function to get bartib projects (cross-shell)
+__bartib_get_projects() {
+    if __comp_command_exists bartib; then
+        bartib projects --no-quotes 2>/dev/null | sort
+    fi
+}
+
+# Function to get bartib tasks (cross-shell)
+__bartib_get_tasks() {
+    if __comp_command_exists bartib; then
+        bartib last 2>/dev/null | head -n -1 | awk '
+            BEGIN { a="" } 
+            NR > 2 {
+                for (i=2; i <= NF - 1; i++) { 
+                    if (i != 2) { 
+                        a=a" "$i 
+                    } else { 
+                        a=$i 
+                    } 
+                } 
+                gsub("[\[\]]", "", $1); 
+                printf("%s[%s]\n", $1, a)
+            }'
+    fi
+}
+
+# Function to get bartib subcommands (cross-shell)
+__bartib_get_subcommands() {
+    echo "cancel change check continue current edit help last list projects report sanity search start status stop"
+}
+
+# Function to check if bartib is running (cross-shell)
+__bartib_is_running() {
+    if __comp_command_exists bartib; then
+        bartib current >/dev/null 2>&1
+    else
+        return 1
+    fi
+}

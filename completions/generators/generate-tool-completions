@@ -1,0 +1,135 @@
+#!/bin/sh
+# completions/generators/generate-tool-completions
+# Description: Generate completions for tools that support it
+# Usage: Called automatically by 25-completions.sh
+
+# Tools that can generate their own completions
+COMPLETION_TOOLS="
+    gh:gh completion
+    docker:docker completion
+    kubectl:kubectl completion
+    helm:helm completion
+    terraform:terraform -install-autocomplete
+    pip:pip completion
+    poetry:poetry completions
+    cargo:rustup completions
+"
+
+generate_completion() {
+    local tool="$1"
+    local completion_cmd="$2"
+    local shell_type="$3"
+    
+    # Check if tool exists
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        return 1
+    fi
+    
+    # Determine output file
+    local comp_file
+    case "$shell_type" in
+        "zsh")
+            comp_file="${DOTFILES_DIR}/completions/zsh/_${tool}"
+            ;;
+        "bash")
+            comp_file="${DOTFILES_DIR}/completions/bash/${tool}-completion.bash"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+    
+    # Skip if completion already exists and is newer than 7 days
+    if [ -f "$comp_file" ]; then
+        if [ "$(find "$comp_file" -mtime -7 2>/dev/null)" ]; then
+            return 0  # File is recent enough
+        fi
+    fi
+    
+    # Generate completion based on the tool
+    case "$tool" in
+        "gh")
+            if [ "$shell_type" = "zsh" ]; then
+                gh completion -s zsh > "$comp_file" 2>/dev/null
+            elif [ "$shell_type" = "bash" ]; then
+                gh completion -s bash > "$comp_file" 2>/dev/null
+            fi
+            ;;
+        "docker")
+            if [ "$shell_type" = "zsh" ]; then
+                docker completion zsh > "$comp_file" 2>/dev/null
+            elif [ "$shell_type" = "bash" ]; then
+                docker completion bash > "$comp_file" 2>/dev/null
+            fi
+            ;;
+        "kubectl")
+            if [ "$shell_type" = "zsh" ]; then
+                kubectl completion zsh > "$comp_file" 2>/dev/null
+            elif [ "$shell_type" = "bash" ]; then
+                kubectl completion bash > "$comp_file" 2>/dev/null
+            fi
+            ;;
+        "helm")
+            if [ "$shell_type" = "zsh" ]; then
+                helm completion zsh > "$comp_file" 2>/dev/null
+            elif [ "$shell_type" = "bash" ]; then
+                helm completion bash > "$comp_file" 2>/dev/null
+            fi
+            ;;
+        "pip")
+            if [ "$shell_type" = "zsh" ]; then
+                pip completion --zsh > "$comp_file" 2>/dev/null
+            elif [ "$shell_type" = "bash" ]; then
+                pip completion --bash > "$comp_file" 2>/dev/null
+            fi
+            ;;
+        # Add more tools as needed
+    esac
+    
+    # Verify the generated file is valid
+    if [ -f "$comp_file" ] && [ -s "$comp_file" ]; then
+        return 0
+    else
+        # Remove empty or invalid file
+        rm -f "$comp_file" 2>/dev/null
+        return 1
+    fi
+}
+
+# Main execution
+main() {
+    # Determine shell type from environment or argument
+    local shell_type
+    if [ -n "$1" ]; then
+        shell_type="$1"
+    elif [ -n "$ZSH_VERSION" ]; then
+        shell_type="zsh"
+    elif [ -n "$BASH_VERSION" ]; then
+        shell_type="bash"
+    else
+        return 0  # Unknown shell, skip
+    fi
+    
+    # Skip if shell doesn't support completions
+    case "$shell_type" in
+        "zsh"|"bash") ;;
+        *) return 0 ;;
+    esac
+    
+    # Process each tool
+    echo "$COMPLETION_TOOLS" | while IFS= read -r line; do
+        [ -z "$line" ] && continue
+        
+        tool="${line%%:*}"
+        completion_cmd="${line#*:}"
+        
+        if [ -n "$tool" ] && [ -n "$completion_cmd" ]; then
+            generate_completion "$tool" "$completion_cmd" "$shell_type"
+        fi
+    done
+}
+
+# Run if executed directly
+if [ "${0##*/}" = "generate-tool-completions" ]; then
+    main "$@"
+fi

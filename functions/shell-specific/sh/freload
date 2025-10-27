@@ -1,0 +1,30 @@
+# functions/shell-specific/sh/freload
+# Description: Reload POSIX sh functions by sourcing function files
+# Usage: freload (reloads all core functions)
+# Compatibility: POSIX sh
+# Features: Re-sources core function definition files only
+
+freload() {
+    if [ $# -gt 0 ]; then
+        echo "freload: sh version only supports reloading all functions" >&2
+        echo "Usage: freload (no arguments)" >&2
+        return 1
+    fi
+    
+    # Only reload core functions in sh
+    local func_dir="${DOTFILES_DIR}/functions/core"
+    local loaded_count=0
+    
+    if [ -d "$func_dir" ]; then
+        for func_file in "$func_dir"/*; do
+            if [ -f "$func_file" ] && [ -r "$func_file" ]; then
+                case "$(basename "$func_file")" in
+                    .*|*~|*.bak|*.orig) continue ;;
+                esac
+                . "$func_file" && loaded_count=$((loaded_count + 1))
+            fi
+        done
+    fi
+    
+    echo "freload: Reloaded $loaded_count core functions"
+}

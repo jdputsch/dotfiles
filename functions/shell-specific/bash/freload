@@ -1,0 +1,59 @@
+# functions/shell-specific/bash/freload
+# Description: Reload bash functions by sourcing function files
+# Usage: freload [function_names...] (if no args, reloads all functions)
+# Compatibility: bash only
+# Features: Re-sources function definition files
+
+freload() {
+    if [ $# -eq 0 ]; then
+        # No arguments - reload all functions
+        local func_dirs=(
+            "${DOTFILES_DIR}/functions/shell-specific/bash"
+            "${DOTFILES_DIR}/functions/extended"
+            "${DOTFILES_DIR}/functions/core"
+        )
+        
+        local loaded_count=0
+        for func_dir in "${func_dirs[@]}"; do
+            if [ -d "$func_dir" ]; then
+                for func_file in "$func_dir"/*; do
+                    if [ -f "$func_file" ] && [ -r "$func_file" ]; then
+                        case "$(basename "$func_file")" in
+                            .*|*~|*.bak|*.orig) continue ;;
+                        esac
+                        source "$func_file" && ((loaded_count++))
+                    fi
+                done
+            fi
+        done
+        echo "freload: Reloaded $loaded_count functions"
+    else
+        # Try to reload specific functions by finding their files
+        while [ $# -gt 0 ]; do
+            local func_name="$1"
+            local found=false
+            
+            # Search for the function file
+            local func_dirs=(
+                "${DOTFILES_DIR}/functions/shell-specific/bash"
+                "${DOTFILES_DIR}/functions/extended"
+                "${DOTFILES_DIR}/functions/core"
+            )
+            
+            for func_dir in "${func_dirs[@]}"; do
+                if [ -f "$func_dir/$func_name" ]; then
+                    source "$func_dir/$func_name"
+                    echo "freload: Reloaded $func_name"
+                    found=true
+                    break
+                fi
+            done
+            
+            if [ "$found" = false ]; then
+                echo "freload: Function '$func_name' not found" >&2
+            fi
+            
+            shift
+        done
+    fi
+}

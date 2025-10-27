@@ -10,8 +10,15 @@
 if ($?USER == 0 || $?prompt == 0) exit
 
 if (($?loginsh) && ($?prompt)) then
-  setenv SHELL /bin/bash
-  exec /bin/bash --login
+  # Check for zsh first, fall back to bash
+  set zsh_path = `which zsh`
+  if ($status == 0 && -x "$zsh_path") then
+    setenv SHELL "$zsh_path"
+    exec "$zsh_path" --login
+  else
+    setenv SHELL /bin/bash
+    exec /bin/bash --login
+  endif
 endif
 
 # To add custom pathing create (or edit) the ~/.ownptah file and add 

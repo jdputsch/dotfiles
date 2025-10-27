@@ -1,0 +1,159 @@
+#compdef bartib
+
+# Zsh completion for bartib time tracker
+# Uses shared data from completions/core/bartib-data
+
+# Source shared bartib data functions
+. "${DOTFILES_DIR}/completions/core/bartib-data"
+
+_bartib_tasks() {
+    local -a _tasks
+    _tasks=(${(f)"$(__bartib_get_tasks)"})
+    _describe "task" _tasks
+}
+
+_bartib_projects() {
+    local -a _projects
+    _projects=(${(f)"$(__bartib_get_projects)"})
+    _describe "project" _projects
+}
+
+_bartib() {
+    local context state line
+    typeset -A opt_args
+
+    _arguments -C \
+        '(-h --help)'{-h,--help}'[Show help information]' \
+        '(-V --version)'{-V,--version}'[Show version information]' \
+        '1: :_bartib_commands' \
+        '*:: :->command_arguments'
+
+    case $state in
+        command_arguments)
+            case $words[1] in
+                cancel)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]'
+                    ;;
+                change)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]' \
+                        '(-d --description)'{-d,--description}'[Description of the new activity]:description:' \
+                        '(-p --project)'{-p,--project}'[Project for the new activity]:project:_bartib_projects' \
+                        '(-t --time)'{-t,--time}'[Time for changing activity status (HH:MM)]:time:'
+                    ;;
+                check)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]'
+                    ;;
+                continue)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]' \
+                        '(-d --description)'{-d,--description}'[Description of the new activity]:description:' \
+                        '(-p --project)'{-p,--project}'[Project for the new activity]:project:_bartib_projects' \
+                        '(-t --time)'{-t,--time}'[Time for changing activity status (HH:MM)]:time:' \
+                        '*::task_number:_bartib_tasks'
+                    ;;
+                current)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]'
+                    ;;
+                edit)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]' \
+                        '*::task_number:_bartib_tasks'
+                    ;;
+                last)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]' \
+                        '(-n --number)'{-n,--number}'[Number of activities to show]:number:'
+                    ;;
+                list)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]' \
+                        '--current-week[Show activities of current week]' \
+                        '--last-week[Show activities of last week]' \
+                        '--no-grouping[Do not group activities by date]' \
+                        '--today[Show activities of current day]' \
+                        '--yesterday[Show yesterday'\''s activities]' \
+                        '(-d --date)'{-d,--date}'[Show activities of specific date]:date:' \
+                        '--from[Begin of date range (inclusive)]:from_date:' \
+                        '--to[End of date range (inclusive)]:to_date:' \
+                        '(-n --number)'{-n,--number}'[Maximum activities to display]:number:' \
+                        '(-p --project)'{-p,--project}'[Show activities for specific project]:project:_bartib_projects' \
+                        '--round[Round start/end time to nearest duration]:duration:'
+                    ;;
+                projects)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]' \
+                        '(-c --current)'{-c,--current}'[Show currently running projects only]' \
+                        '(-n --no-quotes)'{-n,--no-quotes}'[Show projects without quotes]'
+                    ;;
+                report)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]' \
+                        '--current-week[Report for current week]' \
+                        '--last-week[Report for last week]' \
+                        '--today[Report for current day]' \
+                        '--yesterday[Report for yesterday]' \
+                        '(-d --date)'{-d,--date}'[Report for specific date]:date:' \
+                        '--from[Begin of date range]:from_date:' \
+                        '--to[End of date range]:to_date:' \
+                        '(-p --project)'{-p,--project}'[Report for specific project]:project:_bartib_projects' \
+                        '--round[Round times to nearest duration]:duration:'
+                    ;;
+                start)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]' \
+                        '(-d --description)'{-d,--description}'[Description of the activity]:description:' \
+                        '(-p --project)'{-p,--project}'[Project for the activity]:project:_bartib_projects' \
+                        '(-t --time)'{-t,--time}'[Start time (HH:MM)]:time:'
+                    ;;
+                status)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]'
+                    ;;
+                stop)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]' \
+                        '(-t --time)'{-t,--time}'[Stop time (HH:MM)]:time:'
+                    ;;
+                search)
+                    _arguments \
+                        '(-h --help)'{-h,--help}'[Show help information]' \
+                        '(-p --project)'{-p,--project}'[Search in specific project]:project:_bartib_projects' \
+                        '*::search_term:'
+                    ;;
+                help)
+                    _arguments \
+                        '*::subcommand:_bartib_commands'
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_bartib_commands() {
+    local -a commands
+    commands=(
+        'cancel:Cancel the current activity'
+        'change:Change project or description of current activity'
+        'check:Check if time tracking data is valid'
+        'continue:Continue a previous activity'
+        'current:Show current activity'
+        'edit:Edit an activity'
+        'help:Show help for subcommands'
+        'last:Show last activities'
+        'list:List activities'
+        'projects:List projects'
+        'report:Show time report'
+        'sanity:Check data sanity'
+        'search:Search activities'
+        'start:Start a new activity'
+        'status:Show status'
+        'stop:Stop current activity'
+    )
+    _describe 'command' commands
+}
+
+_bartib "$@"

@@ -1,0 +1,58 @@
+#!/bin/bash
+# functions/extended/stop_ssh_cms
+# Description: Shutdown shared SSH connections (controlmasters) - Enhanced version
+# Usage: stop_ssh_cms [hostname_pattern]
+# Compatibility: bash, zsh
+# Requires: Arrays, advanced parameter expansion
+
+stop_ssh_cms() {
+    local pattern="$1"
+    local socket_files=()
+    local found_any=false
+    
+    # Collect socket files safely
+    if [ -d "$HOME/.ssh" ]; then
+        # Use array to collect files
+        while IFS= read -r -d '' socket_file; do
+            socket_files+=("$socket_file")
+        done < <(find "$HOME/.ssh" -name "master-*" -print0 2>/dev/null)
+    fi
+    
+    if [ ${#socket_files[@]} -eq 0 ]; then
+        echo "No SSH control masters found"
+        return 0
+    fi
+    
+    for socket_file in "${socket_files[@]}"; do
+        local socket_name="$(basename "$socket_file")"
+        
+        # If pattern specified, check if this socket matches
+        if [ -n "$pattern" ]; then
+            case "$socket_name" in
+                *"$pattern"*) ;;
+                *) continue ;;
+            esac
+        fi
+        
+        # Extract hostname with better parameter expansion
+        local host="${socket_name#master-}"  # Remove master- prefix
+        host="${host%:22}"                   # Remove :22 suffix
+        host="${host##*@}"                   # Remove everything up to @
+        
+        echo "Stopping $host ..."
+        if ssh -O exit "$host" 2>/dev/null; then
+            found_any=true
+        else
+            echo "  Warning: Failed to stop $host"
+        fi
+    done
+    
+    if [ "$found_any" = false ]; then
+        if [ -n "$pattern" ]; then
+            echo "No SSH control masters found matching pattern: $pattern"
+        else
+            echo "Failed to stop any SSH control masters"
+        fi
+        return 1
+    fi
+}

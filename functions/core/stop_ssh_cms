@@ -1,0 +1,69 @@
+#!/bin/sh
+# functions/core/stop_ssh_cms
+# Description: Shutdown shared SSH connections (controlmasters) - POSIX version
+# Usage: stop_ssh_cms [hostname_pattern]
+# Compatibility: sh, bash, zsh
+
+stop_ssh_cms() {
+    if [ -n "$1" ]; then
+        # Stop specific host pattern
+        pattern="$1"
+        found_any=false
+        
+        if [ -d "$HOME/.ssh" ]; then
+            for socket_file in "$HOME/.ssh"/master-*; do
+                # Check if glob expansion found actual files
+                [ -e "$socket_file" ] || continue
+                
+                # Extract hostname from socket filename
+                socket_name="$(basename "$socket_file")"
+                
+                # Check if this socket matches our pattern
+                case "$socket_name" in
+                    *"$pattern"*) 
+                        # Extract hostname - remove master- prefix and :22 suffix
+                        host="${socket_name#master-}"
+                        host="${host%:22}"
+                        # Remove everything up to @ to get just hostname
+                        host="${host##*@}"
+                        
+                        echo "Stopping $host ..."
+                        ssh -O exit "$host"
+                        found_any=true
+                        ;;
+                esac
+            done
+        fi
+        
+        if [ "$found_any" = false ]; then
+            echo "No SSH control masters found matching pattern: $pattern"
+        fi
+    else
+        # Stop all control masters
+        found_any=false
+        
+        if [ -d "$HOME/.ssh" ]; then
+            for socket_file in "$HOME/.ssh"/master-*; do
+                # Check if glob expansion found actual files
+                [ -e "$socket_file" ] || continue
+                
+                # Extract hostname from socket filename
+                socket_name="$(basename "$socket_file")"
+                
+                # Extract hostname - remove master- prefix and :22 suffix
+                host="${socket_name#master-}"
+                host="${host%:22}"
+                # Remove everything up to @ to get just hostname
+                host="${host##*@}"
+                
+                echo "Stopping $host ..."
+                ssh -O exit "$host"
+                found_any=true
+            done
+        fi
+        
+        if [ "$found_any" = false ]; then
+            echo "No SSH control masters found"
+        fi
+    fi
+}

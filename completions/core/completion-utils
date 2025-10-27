@@ -1,0 +1,103 @@
+#!/bin/sh
+# completions/core/completion-utils
+# Description: Shared completion utilities for cross-shell compatibility
+# Usage: Sourced by completion scripts
+# Compatibility: sh, bash, zsh (functions work across shells)
+
+# Function to check if a command exists
+__comp_command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Function to get list of running processes (cross-shell)
+__comp_get_processes() {
+    if __comp_command_exists ps; then
+        ps -eo comm= | sort -u
+    fi
+}
+
+# Function to get list of users (cross-shell)
+__comp_get_users() {
+    if [ -f /etc/passwd ]; then
+        cut -d: -f1 /etc/passwd | sort
+    fi
+}
+
+# Function to get list of groups (cross-shell)
+__comp_get_groups() {
+    if [ -f /etc/group ]; then
+        cut -d: -f1 /etc/group | sort
+    fi
+}
+
+# Function to get list of network interfaces (cross-shell)
+__comp_get_interfaces() {
+    if __comp_command_exists ip; then
+        ip link show | awk -F': ' '/^[0-9]+:/ {print $2}' | cut -d'@' -f1
+    elif __comp_command_exists ifconfig; then
+        ifconfig -l 2>/dev/null || ifconfig | awk '/^[a-z]/ {print $1}' | sed 's/:$//'
+    fi
+}
+
+# Function to get list of git branches (cross-shell)
+__comp_get_git_branches() {
+    if __comp_command_exists git && git rev-parse --git-dir >/dev/null 2>&1; then
+        git branch --format='%(refname:short)' 2>/dev/null | grep -v '^HEAD$'
+    fi
+}
+
+# Function to get list of git remotes (cross-shell)
+__comp_get_git_remotes() {
+    if __comp_command_exists git && git rev-parse --git-dir >/dev/null 2>&1; then
+        git remote 2>/dev/null
+    fi
+}
+
+# Function to get SSH hosts from config (cross-shell)
+__comp_get_ssh_hosts() {
+    local ssh_config_files="$HOME/.ssh/config /etc/ssh/ssh_config"
+    local host
+    
+    for config_file in $ssh_config_files; do
+        if [ -f "$config_file" ]; then
+            # Extract Host entries, excluding wildcards
+            awk '/^Host[[:space:]]/ {
+                for (i=2; i<=NF; i++) {
+                    if ($i !~ /[*?]/) {
+                        print $i
+                    }
+                }
+            }' "$config_file"
+        fi
+    done | sort -u
+}
+
+# Function to get list of docker containers (cross-shell)
+__comp_get_docker_containers() {
+    if __comp_command_exists docker; then
+        docker ps --format "table {{.Names}}" --no-trunc | tail -n +2
+    fi
+}
+
+# Function to get list of docker images (cross-shell)  
+__comp_get_docker_images() {
+    if __comp_command_exists docker; then
+        docker images --format "table {{.Repository}}:{{.Tag}}" --no-trunc | tail -n +2 | grep -v '<none>'
+    fi
+}
+
+# Function to split string on delimiter (cross-shell)
+__comp_split_string() {
+    local input="$1"
+    local delimiter="$2"
+    local old_ifs="$IFS"
+    
+    IFS="$delimiter"
+    set -- $input
+    IFS="$old_ifs"
+    
+    # Return arguments
+    for arg in "$@"; do
+        echo "$arg"
+    done
+}
