@@ -5,7 +5,7 @@
         followTags = true
 
 [diff]
-	tool = p4merge
+	tool = bc
 [difftool]
         prompt = false
 [merge]
@@ -27,5 +27,8 @@
 	trustExitCode = true
 [safe]
 	directory = /workspace
+	directory = /cache/picache/*/*/*/*
 [init]
 	defaultBranch = main
+[difftool "bc"]
+	trustExitCode = true
