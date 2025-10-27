@@ -67,28 +67,28 @@ if [[ "${KERNEL}" == *Microsoft* ]]; then
 fi
 
 # Execute code that does not affect the current session in the background.
-{
-  # Set environment variables for launchd processes.
-  # Only run on interactive login shells on macOS to avoid unnecessary calls
-  # Check for macOS, interactive shell, and login shell (portable across sh/bash/zsh)
-  if [[ "$OSTYPE" == darwin* ]]; then
-    # Check if shell is interactive (portable method)
-    case $- in
-      *i*) _is_interactive=true ;;
-      *) _is_interactive=false ;;
-    esac
-    
-    # Only run launchctl if interactive login
-    if [ "$_is_interactive" = true ]; then
-      for env_var in PATH MANPATH; do
-        # Use portable variable expansion instead of zsh-specific ${(P)var}
-        case $env_var in
-          PATH) launchctl setenv "$env_var" "$PATH" 2>/dev/null ;;
-          MANPATH) launchctl setenv "$env_var" "$MANPATH" 2>/dev/null ;;
-        esac
-      done
+silent_background sh -c '
+    # Set environment variables for launchd processes.
+    # Only run on interactive shells on macOS to avoid unnecessary calls
+    # Check for macOS and interactive shell (portable across sh/bash/zsh)
+    if [ "${OSTYPE#darwin}" != "${OSTYPE}" ]]; then
+      # Check if shell is interactive (portable method)
+      case $- in
+        *i*) _is_interactive=true ;;
+        *) _is_interactive=false ;;
+      esac
+      
+      # Only run launchctl if interactive
+      if [ "$_is_interactive" = true ]; then
+        for env_var in PATH MANPATH; do
+          # Use portable variable expansion instead of zsh-specific ${(P)var}
+          case $env_var in
+            PATH) launchctl setenv "$env_var" "$PATH" 2>/dev/null ;;
+            MANPATH) launchctl setenv "$env_var" "$MANPATH" 2>/dev/null ;;
+          esac
+        done
+      fi
+      
+      unset _is_interactive
     fi
-    
-    unset _is_interactive
-  fi
-} &!
+  '
