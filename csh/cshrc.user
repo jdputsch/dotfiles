@@ -10,15 +10,59 @@
 if ($?USER == 0 || $?prompt == 0) exit
 
 if (($?loginsh) && ($?prompt)) then
-  # Check for zsh first, fall back to bash
-  set zsh_path = `which zsh`
-  if ($status == 0 && -x "$zsh_path") then
+  # Check for zsh in custom installation path first, then system zsh, fall back to bash
+  set zsh_path = ""
+  
+  # Try to find zsh in $HOME/apps/zsh/<ver>/$OSTYPE/<os-major-rev>/bin
+  if ($?HOME && $?OSTYPE) then
+    # Normalize OSTYPE - use 'linux' for any OSTYPE starting with 'linux'
+    set normalized_ostype = "$OSTYPE"
+    if ("$OSTYPE" =~ linux*) then
+      set normalized_ostype = "linux"
+    endif
+    
+    # Get OS major revision from lsb_release (extract first number before dot)
+    set os_major_rev = `lsb_release -r -s |& \grep -v 'command not found' | sed 's/\([0-9]*\).*/\1/'`
+    
+    # If lsb_release not available, try fallback methods
+    if ("$os_major_rev" == "" || $status != 0) then
+      # Try /etc/os-release for modern Linux systems
+      if (-f /etc/os-release) then
+        set os_major_rev = `\grep '^VERSION_ID=' /etc/os-release |& \grep -v 'No such file' | sed 's/VERSION_ID="\?\([0-9]*\).*/\1/'`
+      endif
+    endif
+    
+    # Look for zsh installations in version directories (major.minor format)
+    # Sort versions in descending order to prefer newer versions
+    foreach zsh_dir (`\ls -d $HOME/apps/zsh/[0-9]*.[0-9]* |& \grep -v 'No match' | sort -t. -k1,1nr -k2,2nr`)
+      set potential_zsh = "$zsh_dir/$normalized_ostype/$os_major_rev/bin/zsh"
+      if (-x "$potential_zsh") then
+        set zsh_path = "$potential_zsh"
+        break
+      endif
+    end
+    
+    unset os_major_rev potential_zsh normalized_ostype
+  endif
+  
+  # If custom zsh not found, try system zsh
+  if ("$zsh_path" == "") then
+    set zsh_path = `which zsh |& \grep -v 'not found'`
+    if ($status != 0) then
+      set zsh_path = ""
+    endif
+  endif
+  
+  # Execute zsh if found, otherwise fall back to bash
+  if ("$zsh_path" != "" && -x "$zsh_path") then
     setenv SHELL "$zsh_path"
     exec "$zsh_path" --login
   else
     setenv SHELL /bin/bash
     exec /bin/bash --login
   endif
+  
+  unset zsh_path
 endif
 
 # To add custom pathing create (or edit) the ~/.ownptah file and add 
