@@ -32,7 +32,7 @@ safe_symlink() {
 
             # Check if it already points to the correct location
             if [ "$current_target" = "$target" ]; then
-                echo "Symlink already exists and points to the correct location"
+                echo "Symlink (${link_path}) already exists and points to the correct location"
             else
                 # Symlink exists but points to wrong target - rename it
                 mv "$link_path" "$link_path.bak"
@@ -60,11 +60,10 @@ safe_symlink() {
 do_install_darwin() {
 	local install_dir
 	info "[system] Install Darwin (MacOS) specific items..."
-	[ -x /opt/local/bin/git ] || sudo port install git
-	info "[system] bash"
-	[ -x /opt/local/bin/bash ] || sudo port install bash
-	info "[system] tmux"
-	[ -x /opt/local/bin/tmux ] || sudo port install tmux
+	if [ ! -d /opt/homebrew ]; then
+	    info "[system][macos][homebrew] Install Homebrew"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+	fi
 }
 
 do_install() {
