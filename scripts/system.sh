@@ -106,8 +106,12 @@ do_configure() {
     ln -sf "$(pwd)/sh/profile" "${HOME}/.profile"
     info "[system][configure][bash] .bash_profile"
     ln -sf "$(pwd)/bash/bash_profile" "${HOME}/.bash_profile"
+    info "[system][configure][bash] .bashrc"
+    ln -sf "$(pwd)/bash/bashrc" "${HOME}/.bashrc"
     info "[system][configure][zsh] .zprofile"
     ln -sf "$(pwd)/zsh/zprofile" "${HOME}/.zprofile"
+    info "[system][configure][zsh] .zshrc"
+    ln -sf "$(pwd)/zsh/zshrc" "${HOME}/.zshrc"
     info "[system][configure][common bash/zsh shell init] $HOME/.config/profile.d"
     if [ -e ${HOME}/.config/profile.d ] && [ ! -h ${HOME}/.config/profile.d ]; then
         rm -rf ${HOME}/.config/profile.d

@@ -69,6 +69,9 @@
 # Set environment variables early in the sequence of init files, we
 # may rely on them in later init files (e.g. setting PATH)
 
+if [ -f "$HOME"/DOTFILE_DEBUG ]; then
+    echo "DEBUG: Init file: $HOME/.config/profile.d/05-env.sh" >&2
+fi
 
 # Basic X11 environment settings
 export XENVIRONMENT=${HOME}/.Xdefaults
@@ -86,6 +89,7 @@ export RUSTUP_HOME="$XDG_DATA_HOME"/rustup
 # Setup Go locations
 export GOPATH="$XDG_DATA_HOME"/go
 if [[ ${OS} = linux ]]; then
+    :
 fi
 
 # Places we may need to set the SHELL environment variable

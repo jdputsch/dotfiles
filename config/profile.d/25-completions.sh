@@ -33,6 +33,10 @@
 # Location: config/profile.d/25-completions.sh
 #
 
+if [ -f "$HOME"/DOTFILE_DEBUG ]; then
+    echo "DEBUG: Init file: $home/.config/profile.d/25-completions.sh" >&2
+fi
+
 # Ensure DOTFILES_DIR is set
 if [ -z "$DOTFILES_DIR" ]; then
     echo "Warning: DOTFILES_DIR not set, cannot load completions" >&2

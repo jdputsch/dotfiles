@@ -1,0 +1,4 @@
+if [ -f "$HOME"/DOTFILE_DEBUG ]; then
+    echo "DEBUG: Init file: $HOME/.bashrc" >&2
+fi
+[ -r "$HOME"/.profile ] && source "$HOME"/.profile >/dev/null
