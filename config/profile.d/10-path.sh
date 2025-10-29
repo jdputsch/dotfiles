@@ -1,3 +1,5 @@
+#!/bin/sh
+#
 # 10-path.sh - Shell Environment Path Configuration
 #
 # This script configures essential search paths for shell environments, including
@@ -14,12 +16,10 @@
 # - Unique path entry enforcement to prevent duplicates
 #
 # Path Variables Managed:
-# - path/PATH: Executable search paths
-# - manpath/MANPATH: Manual page search paths
-# - infopath/INFOPATH: Info document search paths
-# - cdpath/CDPATH: Directory search paths for cd command
-# - fpath/FPATH: Function search paths (Zsh)
-# - mailpath/MAILPATH: Mail file search paths
+# - PATH: Executable search paths
+# - MANPATH: Manual page search paths
+# - INFOPATH: Info document search paths
+# - CDPATH: Directory search paths for cd command
 #
 # Platform Support:
 # - macOS: Uses path_helper when available, handles APFS considerations
@@ -40,7 +40,6 @@
 # - OSTYPE: Operating system detection
 # - PLATFORM_ID: Platform-specific binary directory
 # - HOME: User home directory
-# - ZSH_DEBUG: Debug logging when set
 #
 # Author: Jeff Putsch
 # Part of: dotfiles configuration
@@ -51,96 +50,145 @@ if [ -f "$HOME"/DOTFILE_DEBUG ]; then
     echo "DEBUG: Init file: $HOME/.config/profile.d/10-path.sh" >&2
 fi
 
-# If modules is available, use it, else manage key paths here
-if [ -f /usr/cadtools/bin/modules.dir/Shrc ]; then
-    if [[ -o login ]]; then
-      . /usr/cadtools/bin/modules.dir/Shrc
+# Helper function to add to path if directory exists and isn't already in path
+add_to_path() {
+    if [ -d "$1" ]; then
+        case ":$PATH:" in
+            *":$1:"*) :;; # Already in path
+            *) PATH="$1:$PATH";;
+        esac
     fi
-else
-    # Paths - make sure these have unique entries, then set default vaules
-    typeset -gU cdpath fpath mailpath manpath path
-    typeset -gUT INFOPATH infopath
-    
-    # Set the the list of directories that cd searches.
-    cdpath=(
-      $cdpath
-    )
-    
-    # Set the list of directories that `info` searches for manuals.
-    infopath=(
-      /usr/local/share/info
-      /usr/share/info
-      $infopath
-    )
-    
-    # OSX has a path helper (/usr/libexec/path_helper) to set PATH and MANPATH
-    # variables, normally I would use it, but I use APFs on Mac, therefore I don't
-    # use path helper anymore: on APFS, the order of files read from /etc/paths.d
-    # is not ascii/numeric anymore. therfore, we'll emulate it here.
-    
-    
-    
-    # Set the list of directories that Zsh searches for programs.
-    if [[ $OSTYPE = darwin* ]] && [ -x /usr/libexec/path_helper ]; then
-    	eval `/usr/libexec/path_helper -s`
-    else
-      # Set the list of directories that man searches for manuals.
-      if [[ $OSTYPE != darwin* ]]; then
-          manpath=(
-            /usr/local/share/man
-            /usr/share/man
-            $manpath
-          )
-        for path_file in /etc/manpaths.d/*(.N); do
-          manpath+=($(<$path_file))
-        done
-        unset path_file
-      fi
-      # Now set path entries
-      path=(
-        /usr/local/{bin,sbin}
-        /usr/{bin,sbin}
-        /{bin,sbin}
-        ~/bin
-        $path
-      )
-      for path_file in /etc/paths.d/*(.N); do
-        path+=($(<$path_file))
-      done
-      unset path_file
-    fi
-    
-    # Add personal, custom paths
-    for path_file in ${HOME}/.paths.d/*(@N,.N); do
-      [ -e $HOME/ZSH_DEBUG ] && echo ".zshenv: settings paths from $path_file" >> $HOME/ZSH_DEBUG
-       for path_elem in $(cat ${path_file}); do
-           if [ -d ${(e)path_elem} ]; then
-               path+=(${(e)path_elem})
-           fi
-       done
-       unset path_elem
-    done
-    unset path_file
-    
-    # Move some path elements to the beginning of our search path
-    if [ -n "${PLATFORM_ID}" ] && [ -d ${HOME}/${PLAT}/bin ]; then
-        path=( ${HOME}/${PLATFORM_ID}/bin $path)
-    fi
-    
-    # Remove path elements that start with "/tmp/" -- a Maxim/Linux artifact:
-    path=("${(@)path:#/tmp/*}")
+}
 
-    # MacOSX
-    if [[ "$OSTYPE" = darwin*  && -d /opt/pkg ]]; then
-      infopath=(
-        $infopath
-        /opt/pkg/info
-      )
+# Helper function to add to manpath if directory exists
+add_to_manpath() {
+    if [ -d "$1" ]; then
+        case ":${MANPATH-}:" in
+            *":$1:"*) :;; # Already in manpath
+            *) MANPATH="${MANPATH:+$MANPATH:}$1";;
+        esac
     fi
-    
-    # Linux
-    if [[ "$OSTYPE" = linux* ]]; then
-        [[ -d /usr/sepp/man ]] && manpath=($manpath /usr/sepp/man)
-        [[ -d /home/tekcad/local/man ]] && manpath=($manpath /home/tekcad/local/man)
+}
+
+# Helper function to add to infopath if directory exists
+add_to_infopath() {
+    if [ -d "$1" ]; then
+        case ":${INFOPATH-}:" in
+            *":$1:"*) :;; # Already in infopath
+            *) INFOPATH="${INFOPATH:+$INFOPATH:}$1";;
+        esac
     fi
+}
+
+# If modules is available, use it
+if [ -f /usr/cadtools/bin/modules.dir/Shrc ]; then
+    # Check if this is being sourced by a login shell
+    case "$0" in
+        -*) . /usr/cadtools/bin/modules.dir/Shrc ;;
+    esac
+else
+    # Initialize paths if not already set
+    : "${MANPATH:=}"
+    : "${INFOPATH:=}"
+    : "${CDPATH:=}"
+
+    # Add standard info directories
+    add_to_infopath /usr/local/share/info
+    add_to_infopath /usr/share/info
+
+    # OSX path helper handling
+    if [ "${OSTYPE-}" = darwin* ] && [ -x /usr/libexec/path_helper ]; then
+        eval "$(/usr/libexec/path_helper -s)"
+    else
+        # Add standard man directories on non-Darwin systems
+        if [ "${OSTYPE-}" != darwin* ]; then
+            add_to_manpath /usr/local/share/man
+            add_to_manpath /usr/share/man
+
+            # Process manpaths from /etc/manpaths.d
+            if [ -d /etc/manpaths.d ]; then
+                for path_file in /etc/manpaths.d/*; do
+                    if [ -f "$path_file" ]; then
+                        while read -r dir; do
+                            [ -n "$dir" ] && add_to_manpath "$dir"
+                        done < "$path_file"
+                    fi
+                done
+            fi
+        fi
+
+        # Add standard binary paths
+        for dir in \
+            "$HOME/bin" \
+            /usr/local/bin \
+            /usr/local/sbin \
+            /usr/bin \
+            /usr/sbin \
+            /bin \
+            /sbin; do
+            add_to_path "$dir"
+        done
+
+        # Process paths from /etc/paths.d
+        if [ -d /etc/paths.d ]; then
+            for path_file in /etc/paths.d/*; do
+                if [ -f "$path_file" ]; then
+                    while read -r dir; do
+                        [ -n "$dir" ] && add_to_path "$dir"
+                    done < "$path_file"
+                fi
+            done
+        fi
+    fi
+
+    # Process personal custom paths from ~/.paths.d
+    if [ -d "${HOME}/.paths.d" ]; then
+        for path_file in "${HOME}"/.paths.d/*; do
+            if [ -f "$path_file" ]; then
+                while read -r path_elem; do
+                    case "$path_elem" in
+                        ""|\#*) continue ;; # Skip empty lines and comments
+                        *)
+                            # Expand any variables in the path
+                            eval "path_elem=$path_elem"
+                            [ -d "$path_elem" ] && add_to_path "$path_elem"
+                            ;;
+                    esac
+                done < "$path_file"
+            fi
+        done
+    fi
+
+    # Add platform-specific paths
+    if [ -n "${PLATFORM_ID-}" ] && [ -d "${HOME}/${PLATFORM_ID}/bin" ]; then
+        add_to_path "${HOME}/${PLATFORM_ID}/bin"
+    fi
+
+    # Remove /tmp paths
+    new_path=""
+    saved_ifs=$IFS
+    IFS=:
+    for p in $PATH; do
+        case "$p" in
+            /tmp/*) continue ;;
+            *) new_path="${new_path:+$new_path:}$p" ;;
+        esac
+    done
+    IFS=$saved_ifs
+    PATH=$new_path
+    unset new_path saved_ifs p
+
+    # MacOSX specific paths
+    if [ "${OSTYPE-}" = darwin* ] && [ -d /opt/pkg ]; then
+        add_to_infopath /opt/pkg/info
+    fi
+
+    # Linux specific paths
+    if [ "${OSTYPE-}" = linux* ]; then
+        [ -d /usr/sepp/man ] && add_to_manpath /usr/sepp/man
+        [ -d /home/tekcad/local/man ] && add_to_manpath /home/tekcad/local/man
+    fi
+
+    # Export all modified path variables
+    export PATH MANPATH INFOPATH CDPATH
 fi

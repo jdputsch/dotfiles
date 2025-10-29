@@ -41,7 +41,7 @@
 # Location: config/profile.d/99-zzz-tweaks.sh
 #
 
-if [ -f "$HOME"/DOTFILE_DEBUG ]; then
+if [ -f "$HOME/DOTFILE_DEBUG" ]; then
     echo "DEBUG: Init file: $HOME/.config/profile.d/99-zzz-tweaks.sh" >&2
 fi
 
@@ -68,56 +68,62 @@ command_exists() {
 }
 
 # Setup prompt and title updates
-if [ -n "$PS1" ]; then  # Only for interactive shells
-    # Source util.sh if is_adi_host is not available
-    if ! command_exists is_adi_host; then
-        # shellcheck disable=SC1091
-        . "${HOME}/.dotfiles/scripts/util.sh"
-    fi
+case $- in
+    *i*)  # Only for interactive shells
+        # Source util.sh if is_adi_host is not available
+        if ! command_exists is_adi_host; then
+            # shellcheck disable=SC1091
+            . "${HOME}/.dotfiles/scripts/util.sh"
+        fi
 
-    # Set initial prompt to hostname
-    PS1="$(hostname_short)$ "
+        # Set initial prompt to hostname
+        PS1="$(hostname_short)$ "
 
-    # If we're on an ADI host, set up title updates
-    if command_exists is_adi_host && is_adi_host; then
-        # Different handling for different shells while maintaining compatibility
-        case "${SHELL##*/}" in
-            bash)
-                # For bash, use PROMPT_COMMAND
-                # PROMPT_COMMAND='pwd_short="${PWD/#$HOME/~}"; if [ "$(get_current_command)" = "bash" ]; then set_term_title "${pwd_short}"; else set_term_title "$(get_current_command)"; fi'
-                PROMPT_COMMAND='pwd_short="${PWD/#$HOME/~}"; if [ "$(get_current_command)" = "bash" ]; then set_term_title "${pwd_short}"; else set_term_title "$(ps -p $$ -o args= 2>/dev/null | sed "s/^-//")"; fi'
-                ;;
-            zsh)
-                # For zsh, use precmd and preexec hooks
-                precmd() {
-                    pwd_short="${PWD/#$HOME/~}"
+        # If we're on an ADI host, set up title updates
+        if command_exists is_adi_host && is_adi_host; then
+            # Different handling for different shells while maintaining compatibility
+            current_shell="${SHELL##*/}"
+            case "$current_shell" in
+                bash)
+                    # For bash, use PROMPT_COMMAND
+                    pwd_short="${PWD#$HOME}"
+                    pwd_short="~${pwd_short}"
+                    PROMPT_COMMAND='pwd_short="${PWD#$HOME}"; pwd_short="~${pwd_short}"; if [ "$(get_current_command)" = "bash" ]; then set_term_title "${pwd_short}"; else set_term_title "$(ps -p $$ -o args= 2>/dev/null | sed "s/^-//")"; fi'
+                    ;;
+                zsh)
+                    # For zsh, use precmd and preexec hooks
+                    precmd() {
+                        pwd_short="${PWD#$HOME}"
+                        pwd_short="~${pwd_short}"
+                        set_term_title "${pwd_short}"
+                    }
+                    preexec() {
+                        cmd="$1"
+                        set_term_title "${cmd}"
+                    }
+                    ;;
+                *)
+                    # For other shells, just set initial title to PWD
+                    pwd_short="${PWD#$HOME}"
+                    pwd_short="~${pwd_short}"
                     set_term_title "${pwd_short}"
-                }
-                preexec() {
-                    #cmd="${1%% *}"
-                    cmd="${1}"
-                    set_term_title "${cmd}"
-                }
-                ;;
-            *)
-                # For other shells, just set initial title to PWD
-                pwd_short="${PWD/#$HOME/\~}"
-                set_term_title "${pwd_short}"
-                ;;
-        esac
-    fi
-fi
+                    ;;
+            esac
+        fi
+        ;;
+esac
 
 #
 # WSL does not implement nice(2), therefore we turn off BG_NICE
 #
-if [ "${KERNEL}" = *Microsoft* ]; then
+if [ "${KERNEL}" = "*Microsoft*" ]; then
     if [ "${SHELL##*/}" = "zsh" ]; then
         unsetopt BG_NICE
     fi
 fi
 
 # Execute code that does not affect the current session in the background.
+# note: silent_background is setup in 20-functions.sh
 silent_background sh -c '
     # Set environment variables for launchd processes.
     # Only run on interactive shells on macOS to avoid unnecessary calls
