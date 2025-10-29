@@ -102,6 +102,9 @@ do_configure() {
     if is_adi_host; then
 		ln -sf "$(pwd)/csh/cshrc.user" "${HOME}/.cshrc.user"
 	fi
+    info "[system][configure][terminfo] .terminfo"
+    mkdir -p "${HOME}/.terminfo"
+    ln -sf "$(pwd)/terminfo" "${HOME}/.terminfo"
     info "[system][configure][sh] .profile"
     ln -sf "$(pwd)/sh/profile" "${HOME}/.profile"
     info "[system][configure][bash] .bash_profile"
