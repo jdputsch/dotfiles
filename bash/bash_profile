@@ -1,3 +1,4 @@
-[ -r "$HOME"/.profile ] && source "$HOME"/.profile >/dev/null 2>&1
-
-[[ $- =~ i ]] && [ -r "$HOME"/.zshrc ] && source "$HOME"/.zshrc
+if [ -f "$HOME"/DOTFILE_DEBUG ]; then
+    echo "DEBUG: Init file: $HOME/.bash_profile" >&2
+fi
+[[ $- =~ i ]] && [ -r "$HOME"/.bashrc ] && source "$HOME"/.bashrc

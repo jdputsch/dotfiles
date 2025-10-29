@@ -47,6 +47,10 @@
 # Location: config/profile.d/10-path.sh
 #
 
+if [ -f "$HOME"/DOTFILE_DEBUG ]; then
+    echo "DEBUG: Init file: $HOME/.config/profile.d/10-path.sh" >&2
+fi
+
 # If modules is available, use it, else manage key paths here
 if [ -f /usr/cadtools/bin/modules.dir/Shrc ]; then
     if [[ -o login ]]; then

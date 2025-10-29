@@ -1,4 +1,3 @@
-
 #!/bin/sh
 #
 # 00-platform.sh - Platform Detection and Core Directory Configuration
@@ -48,6 +47,10 @@
 # Part of: dotfiles configuration system
 # Location: config/profile.d/00-platform.sh
 #
+
+if [ -f "$HOME"/DOTFILE_DEBUG ]; then
+    echo "DEBUG: Init file: $HOME/.config/profile.d/00-platform.sh" >&2
+fi
 
 # Set the location of config profile.d directory (portable across sh/bash/zsh):
 if [ -n "$ZSH_VERSION" ]; then

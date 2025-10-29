@@ -3,6 +3,10 @@
 # for ssh logins, install and configure the libpam-umask package.
 # umask 022
 
+if [ -f "$HOME"/DOTFILE_DEBUG ]; then
+    echo "DEBUG: Init file: $HOME/.profile" >&2
+fi
+
 for file in "$HOME"/.config/profile.d/*.sh; do
   . "$file"
 done
