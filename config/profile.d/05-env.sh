@@ -37,7 +37,7 @@
 # Environment Variables Set:
 # - XENVIRONMENT: X11 resources file location
 # - XDG_CONFIG_HOME: User configuration directory
-# - XDG_DATA_HOME: User data directory  
+# - XDG_DATA_HOME: User data directory
 # - XDG_CACHE_HOME: User cache directory
 # - CARGO_HOME: Rust package manager home
 # - RUSTUP_HOME: Rust toolchain manager home
@@ -74,49 +74,49 @@ if [ -f "$HOME"/DOTFILE_DEBUG ]; then
 fi
 
 # Basic X11 environment settings
-export XENVIRONMENT=${HOME}/.Xdefaults
-
+export XENVIRONMENT="${HOME}/.Xdefaults"
 
 # Setup XDG environment variables
-export XDG_CONFIG_HOME="$HOME"/.config
-export XDG_DATA_HOME="$HOME"/.local/share
-export XDG_CACHE_HOME="$HOME"/.cache
+export XDG_CONFIG_HOME="${HOME}/.config"
+export XDG_DATA_HOME="${HOME}/.local/share"
+export XDG_CACHE_HOME="${HOME}/.cache"
 
 # Setup Rust CARGO and RUSTUP locations
-export CARGO_HOME="$XDG_DATA_HOME"/cargo
-export RUSTUP_HOME="$XDG_DATA_HOME"/rustup
+export CARGO_HOME="${XDG_DATA_HOME}/cargo"
+export RUSTUP_HOME="${XDG_DATA_HOME}/rustup"
 
 # Setup Go locations
-export GOPATH="$XDG_DATA_HOME"/go
-if [[ ${OS} = linux ]]; then
+export GOPATH="${XDG_DATA_HOME}/go"
+if [ "${OS}" = linux ]; then
     :
 fi
 
 # Places we may need to set the SHELL environment variable
-if [[ ${OS} = linux ]]; then
-    if [[ "$(</proc/version)" = *Microsoft* ]]; then
+if [ "${OS}" = linux ]; then
+    if grep -q Microsoft /proc/version 2>/dev/null; then
         export SHELL=/usr/bin/zsh
-    elif [[ -z "${SHELL}" ]]; then
-        export SHELL=$(readlink /proc/$$/exe)
+    elif [ -z "${SHELL}" ]; then
+        # Use ps to get shell path in a POSIX way
+        export SHELL=$(ps -p "$$" -o comm= | sed 's/^-//')
     fi
 fi
 
-## Do not use Apple specific shell sessions
-SHELL_SESSIONS_DISABLE=1
+# Do not use Apple specific shell sessions
+export SHELL_SESSIONS_DISABLE=1
 
-#
 # Language
-if [[ -z "$LANG" ]]; then
-  def_locale=$(locale -a | egrep 'en.*US.*UTF-8')
-  if [[ -n "$def_locale" ]]; then
-    export LANG=$def_locale
-  else
-    export LANG=C
-  fi
+if [ -z "${LANG}" ]; then
+    # Use grep -E instead of egrep and handle the output more carefully
+    def_locale=$(locale -a | grep -E 'en.*US.*UTF-8' | head -n 1)
+    if [ -n "${def_locale}" ]; then
+        export LANG="${def_locale}"
+    else
+        export LANG=C
+    fi
 fi
 
-## Set P4 environment variables based on the platform & host
-if [[ ${OS} = "darwin" ]] && [[ $HOST = JPUTSCH-M01* ]]; then
+# Set P4 environment variables based on the platform & host
+if [ "${OS}" = darwin ] && [ "${HOST}" = "JPUTSCH-M01"* ]; then
     export P4CONFIG=.p4config
     export P4PORT=p4e.adsiv.analog.com:1666
     export P4USER=jputsch
@@ -128,14 +128,9 @@ if [[ ${OS} = "darwin" ]] && [[ $HOST = JPUTSCH-M01* ]]; then
     fi
 fi
 
-## PIP behavior, for python
+# PIP behavior, for python
 # require virtualenv for using pip
 export PIP_REQUIRE_VIRTUALENV=true
-
-# # Browser (Default)
-# if [[ "$OSTYPE" == darwin* ]]; then
-#   export BROWSER='open'
-# fi
 
 # Bartib (time tracker) data file location:
 export BARTIB_FILE="${HOME}/log/bartib/activity.bartib"
