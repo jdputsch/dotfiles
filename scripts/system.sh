@@ -102,9 +102,33 @@ do_configure() {
     if is_adi_host; then
 		ln -sf "$(pwd)/csh/cshrc.user" "${HOME}/.cshrc.user"
 	fi
+
     info "[system][configure][terminfo] .terminfo"
-    mkdir -p "${HOME}/.terminfo"
-    ln -sf "$(pwd)/terminfo" "${HOME}/.terminfo"
+    # Check if $HOME/.terminfo exists
+    if [ -e "$HOME/.terminfo" ]; then
+        # Check if it's a symlink pointing to $HOME/.dotfiles/terminfo
+        if [ -L "$HOME/.terminfo" ]; then
+            # Get the target of the symlink (resolve it)
+            target=$(readlink "$HOME/.terminfo")
+
+            # Check if it already points to the correct location
+            # We need to handle both absolute and relative paths
+            if [ "$target" = "$HOME/.dotfiles/terminfo" ] || \
+               [ "$target" = ".dotfiles/terminfo" ]; then
+               : already exists, do nothing
+            fi
+        fi
+
+        # If we reach here, either it's not a symlink or points elsewhere
+        # Rename it with .bak extension
+        mv "$HOME/.terminfo" "$HOME/.terminfo.bak"
+        echo "Renamed existing .terminfo to .terminfo.bak"
+    fi
+
+    # Create the symlink
+    ln -s "$HOME/.dotfiles/terminfo" "$HOME/.terminfo"
+
+    echo "Created symlink: $HOME/.terminfo -> $HOME/.dotfiles/terminfo"
     info "[system][configure][sh] .profile"
     ln -sf "$(pwd)/sh/profile" "${HOME}/.profile"
     info "[system][configure][bash] .bash_profile"
