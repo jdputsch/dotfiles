@@ -101,9 +101,11 @@ case $- in
                     # For zsh, use precmd and preexec hooks
                     autoload -Uz add-zsh-hook
                     _precmd_title() {
-                        pwd_short="${PWD#$HOME}"
-                        pwd_short="~${pwd_short}"
-                        _set_term_title "${pwd_short}"
+                        if [[ -n "$SSH_CONNECTION" ]]; then
+                          print -Pn "\e]0;%n@%m: %~\a"
+                        else
+                          print -Pn "\e]0;%~\a"
+                        fi
                     }
                     _preexec_title() {
                         cmd="$1"
