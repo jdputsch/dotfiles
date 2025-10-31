@@ -13,7 +13,7 @@
 # Directory Structure:
 # - completions/core/      Shared completion data and cross-shell functions
 # - completions/zsh/       Zsh-specific completion files
-# - completions/bash/      Bash-specific completion files  
+# - completions/bash/      Bash-specific completion files
 # - completions/generators/ Scripts to generate completions from tools
 #
 # Loading Strategy:
@@ -33,37 +33,27 @@
 # Location: config/profile.d/25-completions.sh
 #
 
-if [ -f "$HOME"/DOTFILE_DEBUG ]; then
-    echo "DEBUG: Init file: $home/.config/profile.d/25-completions.sh" >&2
-fi
-
-# Ensure DOTFILES_DIR is set
-if [ -z "$DOTFILES_DIR" ]; then
-    echo "Warning: DOTFILES_DIR not set, cannot load completions" >&2
-    return 1
-fi
-
 # Function to load completions from a directory
 load_completions_from_dir() {
     local comp_dir="$1"
     local loaded_count=0
-    
+
     if [ -d "$comp_dir" ]; then
         # Set nullglob behavior for safe iteration
         if [ -n "$ZSH_VERSION" ]; then
             setopt local_options null_glob
         fi
-        
+
         for comp_file in "$comp_dir"/*; do
             # Check if glob expansion found actual files
             [ -e "$comp_file" ] || continue
-            
+
             if [ -f "$comp_file" ] && [ -r "$comp_file" ]; then
                 # Skip backup files and hidden files
                 case "$(basename "$comp_file")" in
                     .*|*~|*.bak|*.orig|README*) continue ;;
                 esac
-                
+
                 # Source with error handling
                 if . "$comp_file" 2>/dev/null; then
                     loaded_count=$((loaded_count + 1))
@@ -73,7 +63,7 @@ load_completions_from_dir() {
             fi
         done
     fi
-    
+
     # Debug output if COMPLETION_DEBUG is set
     if [ -n "$COMPLETION_DEBUG" ]; then
         echo "25-completions.sh: Loaded $loaded_count completions from $comp_dir" >> "$HOME/completion_debug.log"
@@ -83,16 +73,16 @@ load_completions_from_dir() {
 # Function to generate completions for tools that support it
 generate_missing_completions() {
     local generators_dir="${DOTFILES_DIR}/completions/generators"
-    
+
     if [ -d "$generators_dir" ]; then
         for generator in "$generators_dir"/*; do
             [ -f "$generator" ] && [ -x "$generator" ] || continue
-            
+
             # Execute generator script
             if [ -n "$COMPLETION_DEBUG" ]; then
                 echo "25-completions.sh: Running generator $(basename "$generator")" >> "$HOME/completion_debug.log"
             fi
-            
+
             "$generator" 2>/dev/null
         done
     fi
@@ -120,21 +110,21 @@ case "$SHELL_TYPE" in
             "${DOTFILES_DIR}/completions/zsh"
             "${DOTFILES_DIR}/zsh/functions"  # Legacy location for backward compatibility
         )
-        
+
         for comp_dir in "${comp_dirs[@]}"; do
             if [ -d "$comp_dir" ]; then
                 fpath=("$comp_dir" $fpath)
             fi
         done
-        
+
         # Initialize zsh completion system if not already done
         if ! command -v compinit >/dev/null 2>&1; then
             autoload -Uz compinit
         fi
-        
+
         # Load zsh-specific completions (new location first)
         load_completions_from_dir "${DOTFILES_DIR}/completions/zsh"
-        
+
         # Load legacy completions for backward compatibility (only if not already loaded)
         for comp_file in "${DOTFILES_DIR}/zsh/functions"/_*; do
             [ -e "$comp_file" ] || continue
@@ -145,7 +135,7 @@ case "$SHELL_TYPE" in
             fi
         done
         ;;
-        
+
     "bash")
         # Enable bash completion if available
         if [ -f /usr/share/bash-completion/bash_completion ]; then
@@ -156,7 +146,7 @@ case "$SHELL_TYPE" in
             # macOS with Homebrew
             . /usr/local/etc/bash_completion
         fi
-        
+
         # Load bash-specific completions
         load_completions_from_dir "${DOTFILES_DIR}/completions/bash"
         ;;

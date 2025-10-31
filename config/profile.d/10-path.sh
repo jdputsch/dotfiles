@@ -97,11 +97,14 @@ else
     add_to_infopath /usr/share/info
 
     # OSX path helper handling
-    if [ "${OSTYPE-}" = darwin* ] && [ -x /usr/libexec/path_helper ]; then
-        eval "$(/usr/libexec/path_helper -s)"
-    else
-        # Add standard man directories on non-Darwin systems
-        if [ "${OSTYPE-}" != darwin* ]; then
+    case "${OSTYPE-}" in
+        darwin*)
+            if [ -x /usr/libexec/path_helper ]; then
+                eval "$(/usr/libexec/path_helper -s)"
+            fi
+            ;;
+        *)
+            # Add standard man directories on non-Darwin systems
             add_to_manpath /usr/local/share/man
             add_to_manpath /usr/share/man
 
@@ -115,31 +118,31 @@ else
                     fi
                 done
             fi
-        fi
 
-        # Add standard binary paths
-        for dir in \
-            "$HOME/bin" \
-            /usr/local/bin \
-            /usr/local/sbin \
-            /usr/bin \
-            /usr/sbin \
-            /bin \
-            /sbin; do
-            add_to_path "$dir"
-        done
-
-        # Process paths from /etc/paths.d
-        if [ -d /etc/paths.d ]; then
-            for path_file in /etc/paths.d/*; do
-                if [ -f "$path_file" ]; then
-                    while read -r dir; do
-                        [ -n "$dir" ] && add_to_path "$dir"
-                    done < "$path_file"
-                fi
+            # Add standard binary paths
+            for dir in \
+                "$HOME/bin" \
+                /usr/local/bin \
+                /usr/local/sbin \
+                /usr/bin \
+                /usr/sbin \
+                /bin \
+                /sbin; do
+                add_to_path "$dir"
             done
-        fi
-    fi
+
+            # Process paths from /etc/paths.d
+            if [ -d /etc/paths.d ]; then
+                for path_file in /etc/paths.d/*; do
+                    if [ -f "$path_file" ]; then
+                        while read -r dir; do
+                            [ -n "$dir" ] && add_to_path "$dir"
+                        done < "$path_file"
+                    fi
+                done
+            fi
+            ;;
+    esac
 
     # Process personal custom paths from ~/.paths.d
     if [ -d "${HOME}/.paths.d" ]; then
@@ -178,16 +181,20 @@ else
     PATH=$new_path
     unset new_path saved_ifs p
 
-    # MacOSX specific paths
-    if [ "${OSTYPE-}" = darwin* ] && [ -d /opt/pkg ]; then
-        add_to_infopath /opt/pkg/info
-    fi
-
-    # Linux specific paths
-    if [ "${OSTYPE-}" = linux* ]; then
-        [ -d /usr/sepp/man ] && add_to_manpath /usr/sepp/man
-        [ -d /home/tekcad/local/man ] && add_to_manpath /home/tekcad/local/man
-    fi
+    # OS-specific paths
+    case "${OSTYPE-}" in
+        darwin*)
+            # MacOSX specific paths
+            if [ -d /opt/pkg ]; then
+                add_to_infopath /opt/pkg/info
+            fi
+            ;;
+        linux*)
+            # Linux specific paths
+            [ -d /usr/sepp/man ] && add_to_manpath /usr/sepp/man
+            [ -d /home/tekcad/local/man ] && add_to_manpath /home/tekcad/local/man
+            ;;
+    esac
 
     # Export all modified path variables
     export PATH MANPATH INFOPATH CDPATH
