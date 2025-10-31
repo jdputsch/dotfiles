@@ -2,6 +2,9 @@
 #
 # 99-zzz-tweaks.sh - Final System Tweaks and Adjustments
 #
+# Debug output can be enabled and will be written to $HOME/TWEAKS_DEBUG
+# when that file exists.
+#
 # This script runs last in the profile.d initialization sequence (99-prefix)
 # to apply final tweaks and adjustments that need to happen after all other
 # configuration has been loaded. It handles platform-specific optimizations
@@ -41,8 +44,10 @@
 # Location: config/profile.d/99-zzz-tweaks.sh
 #
 
-if [ -f "$HOME/DOTFILE_DEBUG" ]; then
-    echo "DEBUG: Init file: $HOME/.config/profile.d/99-zzz-tweaks.sh" >&2
+# Check for debug mode
+if [ -f "$HOME/TWEAKS_DEBUG" ]; then
+    TWEAKS_DEBUG=1
+    echo "99-zzz-tweaks.sh: Starting tweaks configuration" >> "$HOME/TWEAKS_DEBUG"
 fi
 
 # POSIX-compliant way to get hostname without domain
@@ -51,7 +56,7 @@ hostname_short() {
 }
 
 # Function to set terminal title
-set_term_title() {
+_set_term_title() {
     printf '\033]0;%s\007' "$1"
 }
 
@@ -70,6 +75,7 @@ command_exists() {
 # Setup prompt and title updates
 case $- in
     *i*)  # Only for interactive shells
+        [ -n "$TWEAKS_DEBUG" ] && echo "99-zzz-tweaks.sh: Setting up interactive shell configuration" >> "$HOME/ENV_TWEAKS"
         # Source util.sh if is_adi_host is not available
         if ! command_exists is_adi_host; then
             # shellcheck disable=SC1091
@@ -80,33 +86,37 @@ case $- in
         PS1="$(hostname_short)$ "
 
         # If we're on an ADI host, set up title updates
-        if command_exists is_adi_host && is_adi_host; then
+        if [ ${OS} = "darwin" ] || ( command_exists is_adi_host && is_adi_host ); then
             # Different handling for different shells while maintaining compatibility
             current_shell="${SHELL##*/}"
+            [ -n "$TWEAKS_DEBUG" ] && echo "99-zzz-tweaks.sh: Configuring terminal title for $current_shell" >> "$HOME/ENV_TWEAKS"
             case "$current_shell" in
                 bash)
                     # For bash, use PROMPT_COMMAND
                     pwd_short="${PWD#$HOME}"
                     pwd_short="~${pwd_short}"
-                    PROMPT_COMMAND='pwd_short="${PWD#$HOME}"; pwd_short="~${pwd_short}"; if [ "$(get_current_command)" = "bash" ]; then set_term_title "${pwd_short}"; else set_term_title "$(ps -p $$ -o args= 2>/dev/null | sed "s/^-//")"; fi'
+                    PROMPT_COMMAND='pwd_short="${PWD#$HOME}"; pwd_short="~${pwd_short}"; if [ "$(get_current_command)" = "bash" ]; then _set_term_title "${pwd_short}"; else _set_term_title "$(ps -p $$ -o args= 2>/dev/null | sed "s/^-//")"; fi'
                     ;;
                 zsh)
                     # For zsh, use precmd and preexec hooks
-                    precmd() {
+                    autoload -Uz add-zsh-hook
+                    _precmd_title() {
                         pwd_short="${PWD#$HOME}"
                         pwd_short="~${pwd_short}"
-                        set_term_title "${pwd_short}"
+                        _set_term_title "${pwd_short}"
                     }
-                    preexec() {
+                    _preexec_title() {
                         cmd="$1"
-                        set_term_title "${cmd}"
+                        _set_term_title "${cmd}"
                     }
+                    add-zsh-hook precmd _precmd_title
+                    add-zsh-hook preexec _preexec_title
                     ;;
                 *)
                     # For other shells, just set initial title to PWD
                     pwd_short="${PWD#$HOME}"
                     pwd_short="~${pwd_short}"
-                    set_term_title "${pwd_short}"
+                    _set_term_title "${pwd_short}"
                     ;;
             esac
         fi
@@ -119,11 +129,13 @@ esac
 if [ "${KERNEL}" = "*Microsoft*" ]; then
     if [ "${SHELL##*/}" = "zsh" ]; then
         unsetopt BG_NICE
+        [ -n "$TWEAKS_DEBUG" ] && echo "99-zzz-tweaks.sh: Disabled BG_NICE for WSL" >> "$HOME/ENV_TWEAKS"
     fi
 fi
 
 # Execute code that does not affect the current session in the background.
 # note: silent_background is setup in 20-functions.sh
+[ -n "$TWEAKS_DEBUG" ] && echo "99-zzz-tweaks.sh: Starting background configuration" >> "$HOME/ENV_TWEAKS"
 silent_background sh -c '
     # Set environment variables for launchd processes.
     # Only run on interactive shells on macOS to avoid unnecessary calls
@@ -147,3 +159,8 @@ silent_background sh -c '
         unset _is_interactive
     fi
 '
+
+# Final debug output and cleanup
+if [ -n "$TWEAKS_DEBUG" ]; then
+    echo "99-zzz-tweaks.sh: Tweaks configuration completed" >> "$HOME/TWEAKS_DEBUG"
+fi
