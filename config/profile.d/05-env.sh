@@ -2,6 +2,9 @@
 #
 # 05-env.sh - Core Environment Variables Configuration
 #
+# Debug output can be enabled and will be written to $HOME/ENV_DEBUG
+# when that file exists.
+#
 # This script sets up essential environment variables that are needed early
 # in the shell initialization process. It runs after platform detection
 # (00-platform.sh) but before path configuration (10-path.sh) to ensure
@@ -69,9 +72,16 @@
 # Set environment variables early in the sequence of init files, we
 # may rely on them in later init files (e.g. setting PATH)
 
-if [ -f "$HOME"/DOTFILE_DEBUG ]; then
-    echo "DEBUG: Init file: $HOME/.config/profile.d/05-env.sh" >&2
+# Setup debugging if ENV_DEBUG file exists
+# Remember if ENV_DEBUG was already set
+was_env_debug_set=
+[ -n "$ENV_DEBUG" ] && was_env_debug_set=1
+
+if [ -f "$HOME/ENV_DEBUG" ]; then
+    ENV_DEBUG=1
+    echo "05-env.sh: Starting environment variable configuration" >> "$HOME/ENV_DEBUG"
 fi
+
 
 # Basic X11 environment settings
 export XENVIRONMENT="${HOME}/.Xdefaults"
@@ -90,6 +100,7 @@ export GOPATH="${XDG_DATA_HOME}/go"
 if [ "${OS}" = linux ]; then
     :
 fi
+[ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set GOPATH=${GOPATH}" >> "$HOME/ENV_DEBUG"
 
 # Places we may need to set the SHELL environment variable
 if [ "${OS}" = linux ]; then
@@ -103,6 +114,8 @@ fi
 
 # Do not use Apple specific shell sessions
 export SHELL_SESSIONS_DISABLE=1
+[ -n "$ENV_DEBUG" ] && echo "05-env.sh: Disabled shell sessions" >> "$HOME/ENV_DEBUG"
+
 
 # Language
 if [ -z "${LANG}" ]; then
@@ -116,10 +129,17 @@ if [ -z "${LANG}" ]; then
 fi
 
 # Set P4 environment variables based on the platform & host
-if [ "${OS}" = darwin ] && [ "${HOST}" = "JPUTSCH-M01"* ]; then
-    export P4CONFIG=.p4config
-    export P4PORT=p4e.adsiv.analog.com:1666
-    export P4USER=jputsch
+if [ "${OS}" = darwin ]; then
+    case "${HOST}" in
+        JPUTSCH-M01*)
+            export P4CONFIG=.p4config
+            export P4PORT=p4e.adsiv.analog.com:1666
+            export P4USER=jputsch
+            [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Configured P4 environment for ${HOST}" >> "$HOME/ENV_DEBUG"
+            ;;
+    esac
+
+
 
     if [ -x /Applications/p4merge.app/Contents/MacOS/p4merge ]; then
         p4merge() {
@@ -134,3 +154,11 @@ export PIP_REQUIRE_VIRTUALENV=true
 
 # Bartib (time tracker) data file location:
 export BARTIB_FILE="${HOME}/log/bartib/activity.bartib"
+
+# Final debug output
+if [ -n "$ENV_DEBUG" ]; then
+    echo "05-env.sh: Environment configuration completed" >> "$HOME/ENV_DEBUG"
+    # Unset ENV_DEBUG if we set it in this script
+    [ -z "$was_env_debug_set" ] && unset ENV_DEBUG
+fi
+unset was_env_debug_set
