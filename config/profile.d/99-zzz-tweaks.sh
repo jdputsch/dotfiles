@@ -98,21 +98,24 @@ case $- in
                     PROMPT_COMMAND='pwd_short="${PWD#$HOME}"; pwd_short="~${pwd_short}"; if [ "$(get_current_command)" = "bash" ]; then _set_term_title "${pwd_short}"; else _set_term_title "$(ps -p $$ -o args= 2>/dev/null | sed "s/^-//")"; fi'
                     ;;
                 zsh)
-                    # For zsh, use precmd and preexec hooks
-                    autoload -Uz add-zsh-hook
-                    _precmd_title() {
-                        if [[ -n "$SSH_CONNECTION" ]]; then
-                          print -Pn "\e]0;%n@%m: %~\a"
-                        else
-                          print -Pn "\e]0;%~\a"
-                        fi
-                    }
-                    _preexec_title() {
-                        cmd="$1"
-                        _set_term_title "${cmd}"
-                    }
-                    add-zsh-hook precmd _precmd_title
-                    add-zsh-hook preexec _preexec_title
+                    # For zsh, use precmd and preexec hooks, but only if not using Apple Terminal
+                    if [ ${OS} != "darwin" ]  || [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
+                        # See: https://srstevenson.com/posts/zsh-terminal-title/
+                        autoload -Uz add-zsh-hook
+                        _precmd_title() {
+                            if [[ -n "$SSH_CONNECTION" ]]; then
+                              print -Pn "\e]0;%n@%m: %~\a"
+                            else
+                              print -Pn "\e]0;%~\a"
+                            fi
+                        }
+                        _preexec_title() {
+                            cmd="$1"
+                            print -Pn "\e]0;${cmd}\a"
+                        }
+                        add-zsh-hook precmd _precmd_title
+                        add-zsh-hook preexec _preexec_title
+                    fi
                     ;;
                 *)
                     # For other shells, just set initial title to PWD
