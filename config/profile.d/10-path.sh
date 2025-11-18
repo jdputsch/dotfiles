@@ -112,7 +112,7 @@ if [ -f /usr/cadtools/bin/modules.dir/Shrc ]; then
     [ -n "$PATH_DEBUG" ] && echo "10-path.sh: Using module system from /usr/cadtools/bin/modules.dir/Shrc" >> "$HOME/PATH_DEBUG"
     # Check if this is being sourced by a login shell
     case "$0" in
-        -*) . /usr/cadtools/bin/modules.dir/Shrc ;;
+        *) . /usr/cadtools/bin/modules.dir/Shrc ;;
     esac
 else
     [ -n "$PATH_DEBUG" ] && echo "10-path.sh: Module system not available, using manual path configuration" >> "$HOME/PATH_DEBUG"
