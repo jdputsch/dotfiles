@@ -80,20 +80,27 @@ was_env_debug_set=
 if [ -f "$HOME/ENV_DEBUG" ]; then
     ENV_DEBUG=1
     echo "05-env.sh: Starting environment variable configuration" >> "$HOME/ENV_DEBUG"
+    echo "05-env.sh: SHELL=${SHELL}" >> "$HOME/ENV_DEBUG"
 fi
 
 
 # Basic X11 environment settings
 export XENVIRONMENT="${HOME}/.Xdefaults"
+[ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set XENVIRONMENT=${XENVIRONMENT}" >> "$HOME/ENV_DEBUG"
 
 # Setup XDG environment variables
 export XDG_CONFIG_HOME="${HOME}/.config"
 export XDG_DATA_HOME="${HOME}/.local/share"
 export XDG_CACHE_HOME="${HOME}/.cache"
+[ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set XDG_CONFIG_HOME=${XDG_CONFIG_HOME}" >> "$HOME/ENV_DEBUG"
+[ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set XDG_DATA_HOME=${XDG_DATA_HOME}" >> "$HOME/ENV_DEBUG"
+[ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set XDG_CACHE_HOME=${XDG_CACHE_HOME}" >> "$HOME/ENV_DEBUG"
 
 # Setup Rust CARGO and RUSTUP locations
 export CARGO_HOME="${XDG_DATA_HOME}/cargo"
 export RUSTUP_HOME="${XDG_DATA_HOME}/rustup"
+[ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set CARGO_HOME=${CARGO_HOME}" >> "$HOME/ENV_DEBUG"
+[ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set RUSTUP_HOME=${RUSTUP_HOME}" >> "$HOME/ENV_DEBUG"
 
 # Setup Go locations
 export GOPATH="${XDG_DATA_HOME}/go"
@@ -126,6 +133,7 @@ if [ -z "${LANG}" ]; then
     else
         export LANG=C
     fi
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set LANG=${LANG}" >> "$HOME/ENV_DEBUG"
 fi
 
 # Set P4 environment variables based on the platform & host
@@ -136,6 +144,9 @@ if [ "${OS}" = darwin ]; then
             export P4PORT=p4e.adsiv.analog.com:1666
             export P4USER=jputsch
             [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Configured P4 environment for ${HOST}" >> "$HOME/ENV_DEBUG"
+            [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set P4CONFIG=${P4CONFIG}" >> "$HOME/ENV_DEBUG"
+            [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set P4PORT=${P4PORT}" >> "$HOME/ENV_DEBUG"
+            [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set P4USER=${P4USER}" >> "$HOME/ENV_DEBUG"
             ;;
     esac
 
@@ -151,9 +162,11 @@ fi
 # PIP behavior, for python
 # require virtualenv for using pip
 export PIP_REQUIRE_VIRTUALENV=true
+[ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set PIP_REQUIRE_VIRTUALENV=${PIP_REQUIRE_VIRTUALENV}" >> "$HOME/ENV_DEBUG"
 
 # Bartib (time tracker) data file location:
 export BARTIB_FILE="${HOME}/log/bartib/activity.bartib"
+[ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set BARTIB_FILE=${BARTIB_FILE}" >> "$HOME/ENV_DEBUG"
 
 # Final debug output
 if [ -n "$ENV_DEBUG" ]; then

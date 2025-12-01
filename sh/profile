@@ -1,12 +1,30 @@
 # $HOME/.profile
+
+# Setup debugging if SHELL_DEBUG file exists
+# Remember if SHELL_DEBUG was already set
+was_shell_debug_set_profile=
+if [ -n "$SHELL_DEBUG" ]; then
+    was_shell_debug_set_profile=1
+    echo ".profile: SHELL_DEBUG already set, Set was_shell_debug_set_profile=$was_shell_debug_set_profile" >> "$HOME/SHELL_DEBUG"
+fi
+
+if [ -f "$HOME/SHELL_DEBUG" ]; then
+    SHELL_DEBUG=1
+    echo ".profile: Entering \$HOME/.profile" >> "$HOME/SHELL_DEBUG"
+fi
+
 # the default umask is set in /etc/profile; for setting the umask
 # for ssh logins, install and configure the libpam-umask package.
 # umask 022
 
-if [ -f "$HOME"/DOTFILE_DEBUG ]; then
-    echo "DEBUG: Init file: $HOME/.profile" >&2
-fi
-
 for file in "$HOME"/.config/profile.d/*.sh; do
   . "$file"
 done
+
+# Final debug output
+if [ -n "$SHELL_DEBUG" ]; then
+    echo ".profile: Exiting \$HOME/.profile" >> "$HOME/SHELL_DEBUG"
+    # Unset SHELL_DEBUG if we set it in this script
+    [ -z "$was_shell_debug_set_profile" ] && unset SHELL_DEBUG
+fi
+unset was_shell_debug_set_profile
