@@ -18,6 +18,14 @@ if [ -z "${(P)profile_sourced_var}" ]; then
     export "$profile_sourced_var"=1
 fi
 
+# Zsh glogging settings
+# Make zsh report errors when glob patterns don't match anything
+setopt nomatch
+
+# Ensure nullglob is not set (nullglob would make patterns expand to nothing)
+unsetopt nullglob
+
+
 # Final debug output
 if [ -n "$SHELL_DEBUG" ]; then
     echo ".zshrc: Exiting \$HOME/.zshrc" >> "$HOME/SHELL_DEBUG"

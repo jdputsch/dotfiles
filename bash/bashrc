@@ -18,6 +18,11 @@ if [ -z "${!profile_sourced_var}" ]; then
     export "$profile_sourced_var"=1
 fi
 
+# Bash globbing settings
+shopt -u nullglob  # Keep default behavior
+shopt -s failglob  # Optional: for stricter error handling
+
+
 # Final debug output
 if [ -n "$SHELL_DEBUG" ]; then
     echo ".bashrc: Exiting \$HOME/.bashrc" >> "$HOME/SHELL_DEBUG"
