@@ -1,4 +1,27 @@
-if [ -f "$HOME"/DOTFILE_DEBUG ]; then
-    echo "DEBUG: Init file: $HOME/.bash_profile" >&2
+# Setup debugging if SHELL_DEBUG file exists
+# Remember if SHELL_DEBUG was already set
+was_shell_debug_set_bash_profile=
+if [ -n "$SHELL_DEBUG" ]; then
+    was_shell_debug_set_bash_profile=1
+    echo ".bash_profile: SHELL_DEBUG already set, Set was_shell_debug_set_bash_profile=$was_shell_debug_set_bash_profile" >> "$HOME/SHELL_DEBUG"
 fi
-[[ $- =~ i ]] && [ -r "$HOME"/.bashrc ] && source "$HOME"/.bashrc
+
+if [ -f "$HOME/SHELL_DEBUG" ]; then
+    SHELL_DEBUG=1
+    echo ".bash_profile: Entering \$HOME/.bash_profile" >> "$HOME/SHELL_DEBUG"
+fi
+
+# Source .bashrc only once per shell session
+bashrc_sourced_var="BASHRC_SOURCED_$$"
+if [ -z "${!bashrc_sourced_var}" ]; then
+    [[ $- =~ i ]] && [ -r "$HOME"/.bashrc ] && source "$HOME"/.bashrc
+    export "$bashrc_sourced_var"=1
+fi
+
+# Final debug output
+if [ -n "$SHELL_DEBUG" ]; then
+    echo ".bash_profile: Exiting \$HOME/.bash_profile" >> "$HOME/SHELL_DEBUG"
+    # Unset SHELL_DEBUG if we set it in this script
+    [ -z "$was_shell_debug_set_bash_profile" ] && unset SHELL_DEBUG
+fi
+unset was_shell_debug_set_bash_profile

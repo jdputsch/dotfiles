@@ -1,1 +1,27 @@
-[[ $- =~ i ]] && [ -r "$HOME"/.zshrc ] && source "$HOME"/.zshrc
+# Setup debugging if SHELL_DEBUG file exists
+# Remember if SHELL_DEBUG was already set
+was_shell_debug_set_zprofile=
+if [ -n "$SHELL_DEBUG" ]; then
+    was_shell_debug_set_zprofile=1
+    echo ".zprofile: SHELL_DEBUG already set, Set was_shell_debug_set_zprofile=$was_shell_debug_set_zprofile" >> "$HOME/SHELL_DEBUG"
+fi
+
+if [ -f "$HOME/SHELL_DEBUG" ]; then
+    SHELL_DEBUG=1
+    echo ".zprofile: Entering \$HOME/.zprofile" >> "$HOME/SHELL_DEBUG"
+fi
+
+# Source .zshrc only once per shell session
+zshrc_sourced_var="DOT_ZSHRC_SOURCED_$$"
+if [ -z "${(P)zshrc_sourced_var}" ]; then
+    [[ $- =~ i ]] && [ -r "$HOME"/.zshrc ] && source "$HOME"/.zshrc
+    export "$zshrc_sourced_var"=1
+fi
+
+# Final debug output
+if [ -n "$SHELL_DEBUG" ]; then
+    echo ".zprofile: Exiting \$HOME/.zprofile" >> "$HOME/SHELL_DEBUG"
+    # Unset SHELL_DEBUG if we set it in this script
+    [ -z "$was_shell_debug_set_zprofile" ] && unset SHELL_DEBUG
+fi
+unset was_shell_debug_set_zprofile

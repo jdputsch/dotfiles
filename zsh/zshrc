@@ -1,1 +1,27 @@
-[ -r "$HOME"/.profile ] && source "$HOME"/.profile >/dev/null 2>&1
+# Setup debugging if SHELL_DEBUG file exists
+# Remember if SHELL_DEBUG was already set
+was_shell_debug_set_zshrc=
+if [ -n "$SHELL_DEBUG" ]; then
+    was_shell_debug_set_zshrc=1
+    echo ".zshrc: SHELL_DEBUG already set, Set was_shell_debug_set_zshrc=$was_shell_debug_set_zshrc" >> "$HOME/SHELL_DEBUG"
+fi
+
+if [ -f "$HOME/SHELL_DEBUG" ]; then
+    SHELL_DEBUG=1
+    echo ".zshrc: Entering \$HOME/.zshrc" >> "$HOME/SHELL_DEBUG"
+fi
+
+# Source .profile only once per shell session
+profile_sourced_var="DOT_PROFILE_SOURCED_$$"
+if [ -z "${(P)profile_sourced_var}" ]; then
+    [ -r "$HOME"/.profile ] && source "$HOME"/.profile >/dev/null 2>&1
+    export "$profile_sourced_var"=1
+fi
+
+# Final debug output
+if [ -n "$SHELL_DEBUG" ]; then
+    echo ".zshrc: Exiting \$HOME/.zshrc" >> "$HOME/SHELL_DEBUG"
+    # Unset SHELL_DEBUG if we set it in this script
+    [ -z "$was_shell_debug_set_zshrc" ] && unset SHELL_DEBUG
+fi
+unset was_shell_debug_set_zshrc
