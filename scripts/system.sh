@@ -62,7 +62,7 @@ do_install_darwin() {
 	info "[system] Install Darwin (MacOS) specific items..."
 	if [ ! -d /opt/homebrew ]; then
 	    info "[system][macos][homebrew] Install Homebrew"
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 	fi
 }
 

@@ -11,7 +11,7 @@ else
 BASH=/usr/bin/bash
 endif
 
-all: system git x11 terminal emacs ## Install and configure everything (default)
+all: system git terminal ## Install and configure everything (default)
 help: ## Display help
 	@grep -hE '^[a-zA-Z_0-9%-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
@@ -34,7 +34,7 @@ emacs: FORCE ## Configure emacs
 x11: FORCE ## Configure X11
 	@./scripts/x11.sh configure
 	
-fonts: FORCE ## Install fonts
+fonts: system-install FORCE ## Install fonts
 	@./scripts/fonts.sh configure
 
 FORCE:
