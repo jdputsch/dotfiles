@@ -37,10 +37,11 @@ do_install() {
     rm -rf "${install_dir}" && mkdir -p "${install_dir}"
     (
         cd "${install_dir}"
-        curl -L -f -O https://github.com/IBM/plex/releases/download/v6.0.2/OpenType.zip
-        unzip OpenType.zip
-        cd OpenType
-        find ./IBM-Plex-{Mono,Sans,Serif} -type f -name '*.otf' -exec cp -n "{}" "${FONTS_DIR}" \;
+        for family in sans mono serif; do
+            curl -sLfO "https://github.com/IBM/plex/releases/download/%40ibm%2Fplex-${family}%401.1.0/ibm-plex-${family}.zip"
+            unzip ibm-plex-${family}.zip
+        done
+        find ./ibm-plex-{mono,sans,serif} -type f -name '*.otf' -exec cp -n "{}" "${FONTS_DIR}" \;
     ) >/dev/null
     rm -rf "${install_dir}"
 
@@ -55,28 +56,20 @@ do_install() {
     ) >/dev/null
     rm -rf "${install_dir}"
 
-    info "[fonts] Install FontAwesome fonts"
-    install_dir="/tmp/font_awesome"
-    rm -rf "${install_dir}" && mkdir -p "${install_dir}"
-    (
-        cd "${install_dir}"
-        curl -s -L -f -O https://use.fontawesome.com/releases/v6.1.1/fontawesome-free-6.1.1-desktop.zip
-        unzip fontawesome-free-6.1.1-desktop.zip
-        find . -type f -name '*.otf' -exec cp -n "{}" "${FONTS_DIR}" \;
-    ) >/dev/null
-    rm -rf "${install_dir}"
-
-    info "[fonts] Install JetBrains Mono fonts"
-    install_dir="/tmp/jb_mono"
-    rm -rf "${install_dir}" && mkdir -p "${install_dir}"
-    (
-        cd "${install_dir}"
-        curl -s -L -f -O https://download.jetbrains.com/fonts/JetBrainsMono-2.242.zip
-        unzip JetBrainsMono-2.242.zip
-        find . -type f -name '*.ttf' -exec cp -n "{}" "${FONTS_DIR}" \;
-    ) >/dev/null
-    rm -rf "${install_dir}"
-
+    info "[fonts] Install JetBrains Mono Nerd fonts"
+    if [ -x /opt/homebrew/bin/brew ]; then
+        brew install --cask font-jetbrains-mono-nerd-font
+    else
+        install_dir="/tmp/jb_mono"
+        rm -rf "${install_dir}" && mkdir -p "${install_dir}"
+        (
+            cd "${install_dir}"
+            curl -s -L -f -O https://download.jetbrains.com/fonts/JetBrainsMono-2.304.zip
+            unzip JetBrainsMono-2.304.zip
+            find . -type f -name '*.ttf' -exec cp -n "{}" "${FONTS_DIR}" \;
+        ) >/dev/null
+        rm -rf "${install_dir}"
+    fi
     if [ "${OS}" == linux ]; then
         fc-cache -f
     fi

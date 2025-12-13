@@ -153,10 +153,12 @@ silent_background sh -c '
 
         # Only run launchctl if interactive
         if [ "$_is_interactive" = true ]; then
-            for env_var in PATH MANPATH; do
+            export NODE_EXTRA_CA_CERTS=/Users/Shared/Netskope/netskope-cert-bundle.pem
+            for env_var in PATH MANPATH NODE_EXTRA_CA_CERTS; do
                 case $env_var in
                     PATH) launchctl setenv "$env_var" "$PATH" 2>/dev/null ;;
                     MANPATH) launchctl setenv "$env_var" "$MANPATH" 2>/dev/null ;;
+                    NODE_EXTRA_CA_CERTS) launchctl setenv "$env_var" "$NODE_EXTRA_CA_CERTS" 2>/dev/null
                 esac
             done
         fi
