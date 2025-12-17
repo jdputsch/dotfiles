@@ -38,7 +38,7 @@
 	helper = 
 	helper = !/usr/bin/gh auth git-credential
 [core]
-	excludesfile = /Users/Jeff.Putsch/.gitignore_global
+	excludesfile = /Users/jeff.putsch/.gitignore_global
 [diff "tool"]
 	trustExitCode = true
 [merge "tool"]
@@ -47,3 +47,4 @@
 	path = /Applications/p4merge.app/Contents/Resources/launchp4merge
 [mergetool "p4merge"]
 	path = /Applications/p4merge.app/Contents/Resources/launchp4merge
+
