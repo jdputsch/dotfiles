@@ -139,7 +139,7 @@ fi
 # Set P4 environment variables based on the platform & host
 if [ "${OS}" = darwin ]; then
     case "${HOST}" in
-        JPUTSCH-M01*)
+        JPUTSCH-M[0-9][0-9]*)
             export P4CONFIG=.p4config
             export P4PORT=p4e.adsiv.analog.com:1666
             export P4USER=jputsch
