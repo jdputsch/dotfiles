@@ -1,0 +1,8 @@
+# functions/core/bartedit
+# Description: Edit bartib time tracking entries using nvim
+# Usage: bartedit
+# Dependencies: bartib, nvim
+
+bartedit() {
+    bartib edit -e nvim
+}

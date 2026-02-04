@@ -130,7 +130,9 @@ else
         darwin*)
             if [ -x /usr/libexec/path_helper ]; then
                 [ -n "$PATH_DEBUG" ] && echo "10-path.sh: Using macOS path_helper" >> "$HOME/PATH_DEBUG"
-                eval "$(/usr/libexec/path_helper -s)"
+                [ -n "$PATH_DEBUG" ] && echo "10-path.sh: path_helper output:" >> "$HOME/PATH_DEBUG"
+                [ -n "$PATH_DEBUG" ] && /usr/libexec/path_helper -s | sed 's/^/\t/' >> "$HOME/PATH_DEBUG"
+                eval "$(MANPATH= /usr/libexec/path_helper -s)"
             fi
             ;;
         *)

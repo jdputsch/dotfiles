@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# POSIX compliant function to tail bartib file
+# Usage: barttail [-n number_of_lines]
+# Default number of lines is 10 (tail's default)
+
+barttail() {
+    # Default values
+    num_lines=""
+
+    # Parse options
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -n)
+                if [ $# -lt 2 ]; then
+                    echo "Error: -n option requires a number" >&2
+                    return 1
+                fi
+                shift
+                # Validate that the argument is a number
+                case "$1" in
+                    ''|*[!0-9]*)
+                        echo "Error: -n option requires a valid number" >&2
+                        return 1
+                        ;;
+                    *)
+                        num_lines="$1"
+                        ;;
+                esac
+                shift
+                ;;
+            -*)
+                echo "Error: Unknown option $1" >&2
+                echo "Usage: barttail [-n number_of_lines]" >&2
+                return 1
+                ;;
+            *)
+                echo "Error: Unexpected argument $1" >&2
+                echo "Usage: barttail [-n number_of_lines]" >&2
+                return 1
+                ;;
+        esac
+    done
+
+    # Check if BARTIB_FILE is set
+    if [ -z "$BARTIB_FILE" ]; then
+        echo "Error: BARTIB_FILE environment variable is not set" >&2
+        return 1
+    fi
+
+    # Check if file exists
+    if [ ! -f "$BARTIB_FILE" ]; then
+        echo "Error: File $BARTIB_FILE does not exist" >&2
+        return 1
+    fi
+
+    # Run tail command
+    if [ -n "$num_lines" ]; then
+        tail -n "$num_lines" "$BARTIB_FILE"
+    else
+        tail "$BARTIB_FILE"
+    fi
+}
