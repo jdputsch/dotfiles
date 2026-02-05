@@ -133,6 +133,7 @@ do_configure() {
         mkdir -p "${logdir}"
         safe_symlink $f "${logdir}/${fname}"
     done
+    mkdir -p ${HOME}/log/bartib
 
     info "[system][configure] Shell (csh, sh, zsh & bash) startup files"
     if is_adi_host; then
