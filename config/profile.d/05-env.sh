@@ -139,7 +139,7 @@ fi
 # Set P4 environment variables based on the platform & host
 if [ "${OS}" = darwin ]; then
     case "${HOST}" in
-        JPUTSCH-M01*)
+        JPUTSCH-M[0-9][0-9]*)
             export P4CONFIG=.p4config
             export P4PORT=p4e.adsiv.analog.com:1666
             export P4USER=jputsch
@@ -167,6 +167,21 @@ export PIP_REQUIRE_VIRTUALENV=true
 # Bartib (time tracker) data file location:
 export BARTIB_FILE="${HOME}/log/bartib/activity.bartib"
 [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set BARTIB_FILE=${BARTIB_FILE}" >> "$HOME/ENV_DEBUG"
+
+# Key settings for common development tool CA bundles
+if [ ${OS} = darwin ]; then
+    export AWS_CA_BUNDLE="/Users/Shared/Netskope/nscacert_combined.pem"
+    export REQUESTS_CA_BUNDLE="/Users/Shared/Netskope/nscacert_combined.pem"
+    export SSL_CERT_FILE="/Users/Shared/Netskope/nscacert_combined.pem"
+    export NODE_EXTRA_CA_CERTS="/Users/Shared/Netskope/nscacert_combined.pem"
+    export GIT_SSL_CAPATH="/Users/Shared/Netskope/nscacert_combined.pem"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Configured CA bundles environment variables for ${HOST}" >> "$HOME/ENV_DEBUG"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set AWS_CA_BUNDLE=${AWS_CA_BUNDLE}"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set REQUESTS_CA_BUNDLE=${REQUESTS_CA_BUNDLE}"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set SSL_CERT_FILE=${SSL_CERT_FILE}"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set NODE_EXTRA_CA_CERTS=${NODE_EXTRA_CA_CERTS}"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set GIT_SSL_CAPATH=${GIT_SSL_CAPATH}"
+fi
 
 # Final debug output
 if [ -n "$ENV_DEBUG" ]; then

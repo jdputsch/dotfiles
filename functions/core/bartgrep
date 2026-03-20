@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# POSIX compliant function to search bartib entries
+# Usage: bartgrep [-n number_of_entries] <search_term>
+# Default number of entries is 50
+
+bartgrep() {
+    # Default values
+    num_entries=50
+    search_term=""
+
+    # Parse options
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -n)
+                if [ $# -lt 2 ]; then
+                    echo "Error: -n option requires a number" >&2
+                    return 1
+                fi
+                shift
+                # Validate that the argument is a number
+                case "$1" in
+                    ''|*[!0-9]*)
+                        echo "Error: -n option requires a valid number" >&2
+                        return 1
+                        ;;
+                    *)
+                        num_entries="$1"
+                        ;;
+                esac
+                shift
+                ;;
+            -*)
+                echo "Error: Unknown option $1" >&2
+                echo "Usage: bartgrep [-n number_of_entries] <search_term>" >&2
+                return 1
+                ;;
+            *)
+                # This should be the search term
+                if [ -n "$search_term" ]; then
+                    echo "Error: Multiple search terms provided" >&2
+                    echo "Usage: bartgrep [-n number_of_entries] <search_term>" >&2
+                    return 1
+                fi
+                search_term="$1"
+                shift
+                ;;
+        esac
+    done
+
+    # Check if search term was provided
+    if [ -z "$search_term" ]; then
+        echo "Usage: bartgrep [-n number_of_entries] <search_term>" >&2
+        return 1
+    fi
+
+    # Run the command
+    bartib last -n "$num_entries" | egrep -i "$search_term"
+}

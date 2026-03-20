@@ -13,10 +13,14 @@ freload() {
             "${DOTFILES_DIR}/functions/core"
             "${DOTFILES_DIR}/zsh/functions"  # Legacy location
         )
-        
+
         for func_dir in "${func_dirs[@]}"; do
             if [ -d "$func_dir" ]; then
+                # Enable nullglob to handle empty directories
+                setopt nullglob
                 for func_file in "$func_dir"/*; do
+                    # Reset nullglob after use
+                    unsetopt nullglob
                     if [ -f "$func_file" ]; then
                         local func_name="$(basename "$func_file")"
                         case "$func_name" in
@@ -27,6 +31,8 @@ freload() {
                         autoload -Uz "$func_name"
                     fi
                 done
+                # Ensure nullglob is reset even if no files were found
+                unsetopt nullglob 2>/dev/null
             fi
         done
         echo "freload: Reloaded all functions"
