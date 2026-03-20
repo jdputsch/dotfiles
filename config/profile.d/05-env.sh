@@ -168,6 +168,21 @@ export PIP_REQUIRE_VIRTUALENV=true
 export BARTIB_FILE="${HOME}/log/bartib/activity.bartib"
 [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set BARTIB_FILE=${BARTIB_FILE}" >> "$HOME/ENV_DEBUG"
 
+# Key settings for common development tool CA bundles
+if [ ${OS} = darwin ]; then
+    export AWS_CA_BUNDLE="/Users/Shared/Netskope/nscacert_combined.pem"
+    export REQUESTS_CA_BUNDLE="/Users/Shared/Netskope/nscacert_combined.pem"
+    export SSL_CERT_FILE="/Users/Shared/Netskope/nscacert_combined.pem"
+    export NODE_EXTRA_CA_CERTS="/Users/Shared/Netskope/nscacert_combined.pem"
+    export GIT_SSL_CAPATH="/Users/Shared/Netskope/nscacert_combined.pem"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Configured CA bundles environment variables for ${HOST}" >> "$HOME/ENV_DEBUG"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set AWS_CA_BUNDLE=${AWS_CA_BUNDLE}"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set REQUESTS_CA_BUNDLE=${REQUESTS_CA_BUNDLE}"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set SSL_CERT_FILE=${SSL_CERT_FILE}"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set NODE_EXTRA_CA_CERTS=${NODE_EXTRA_CA_CERTS}"
+    [ -n "$ENV_DEBUG" ] && echo "05-env.sh: Set GIT_SSL_CAPATH=${GIT_SSL_CAPATH}"
+fi
+
 # Final debug output
 if [ -n "$ENV_DEBUG" ]; then
     echo "05-env.sh: Environment configuration completed" >> "$HOME/ENV_DEBUG"

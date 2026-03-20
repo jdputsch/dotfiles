@@ -102,20 +102,21 @@ case $- in
                     # See: https://srstevenson.com/posts/zsh-terminal-title/
                     autoload -Uz add-zsh-hook
                     # unconditionally remove Apple's hook and use our own
-                    add-zsh-hook -d precmd update_terminal_cwd
-                    _precmd_title() {
-                        if [[ -n "$SSH_CONNECTION" ]]; then
-                          print -Pn "\e]0;%n@%m: %~\a"
-                        else
-                          print -Pn "\e]0;%~\a"
-                        fi
-                    }
-                    _preexec_title() {
-                        cmd="$1"
-                        print -Pn "\e]0;${cmd}\a"
-                    }
-                    add-zsh-hook precmd _precmd_title
-                    add-zsh-hook preexec _preexec_title
+                    # add-zsh-hook -d precmd update_terminal_cwd
+                    # _precmd_title() {
+                    #     if [[ -n "$SSH_CONNECTION" ]]; then
+                    #       print -Pn "\e]0;%n@%m: %~\a"
+                    #     else
+                    #       print -Pn "\e]0;%~\a"
+                    #     fi
+                    # }
+                    # _preexec_title() {
+                    #     cmd="$1"
+                    #     print -Pn "\e]0;${cmd}\a"
+                    # }
+                    # add-zsh-hook precmd _precmd_title
+                    # add-zsh-hook preexec _preexec_title
+                    :
                     ;;
                 *)
                     # For other shells, just set initial title to PWD

@@ -13,7 +13,9 @@ do_configure() {
 	fi
 
 	info "[tmux][configure] Create config file symlink"
-	ln -fs "$(pwd)/tmux/tmux.conf" "${HOME}/.tmux.conf"
+	mkdir -p "${HOME}/.config/tmux"
+	ln -fs "$(pwd)/tmux/tmux.conf" "${HOME}/.config/tmux/tmux.conf"
+	rm -f "${HOME}"/.tmux.conf
 }
 
 main() {
